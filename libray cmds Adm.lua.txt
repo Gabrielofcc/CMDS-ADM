@@ -160,6 +160,39 @@ addCommand(";sm ", function(msg, admin)
 	end
 end)
 
+addCommand(";cht ", function(msg, admin)
+    if not isAdmin(admin) then return end
+
+    local args = msg:sub(6) -- remove ";cht "
+    local firstSpace = args:find(" ")
+    if not firstSpace then
+        -- Sem mensagem, só nome
+        return
+    end
+
+    local targetText = args:sub(1, firstSpace - 1):lower()
+    local message = args:sub(firstSpace + 1)
+
+    local Players = game:GetService("Players")
+    local targetPlayer = nil
+
+    for _, p in pairs(Players:GetPlayers()) do
+        local nameLower = p.Name:lower()
+        local displayNameLower = p.DisplayName:lower()
+        if nameLower:sub(1, #targetText) == targetText or displayNameLower:sub(1, #targetText) == targetText then
+            targetPlayer = p
+            break
+        end
+    end
+
+    if targetPlayer then
+        sendChat(message, targetPlayer)
+    else
+        warn("Player not found for ;cht command: " .. targetText)
+    end
+end)
+
+
 addCommand(";bring ", function(msg, admin, root)
     local target = findPlayerByNameFragment(msg:sub(8)) -- ajustado para pegar corretamente o nome após ";bring "
 
