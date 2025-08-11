@@ -160,37 +160,6 @@ addCommand(";sm ", function(msg, admin)
 	end
 end)
 
-addCommand(";cht ", function(msg, admin)
-    if not isAdmin(admin) then return end
-
-    local args = msg:sub(6) -- remove ";cht "
-    local firstSpace = args:find(" ")
-    if not firstSpace then
-        -- Sem mensagem, só nome
-        return
-    end
-
-    local targetText = args:sub(1, firstSpace - 1):lower()
-    local message = args:sub(firstSpace + 1)
-
-    local Players = game:GetService("Players")
-    local targetPlayer = nil
-
-    for _, p in pairs(Players:GetPlayers()) do
-        local nameLower = p.Name:lower()
-        local displayNameLower = p.DisplayName:lower()
-        if nameLower:sub(1, #targetText) == targetText or displayNameLower:sub(1, #targetText) == targetText then
-            targetPlayer = p
-            break
-        end
-    end
-
-    if targetPlayer then
-        sendChat(message, targetPlayer)
-    else
-        warn("Player not found for ;cht command: " .. targetText)
-    end
-end)
 
 
 addCommand(";bring ", function(msg, admin, root)
@@ -258,24 +227,84 @@ addCommand(";kill all", function(_, admin)
 end)
 
 addCommand(";lag ", function(msg, admin)
-    local nick = msg:sub(6):lower()
+    local targetText = msg:sub(6):lower()
 
     for _, p in pairs(Players:GetPlayers()) do
-        if p.Name:lower():sub(1, #nick) == nick and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+        local nameLower = p.Name:lower()
+        local displayNameLower = p.DisplayName:lower()
+
+        -- Verifica se o texto bate no começo do nome ou do displayName
+        if (nameLower:sub(1, #targetText) == targetText or displayNameLower:sub(1, #targetText) == targetText) 
+           and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = p.Character.HumanoidRootPart
 
+            -- Spawnar 1000 partes minúsculas invisíveis ao redor para lag
             for i = 1, 1000 do
                 local part = Instance.new("Part")
-                part.Size = Vector3.new(0.01, 0.01, 0.01)
+                part.Size = Vector3.new(0.1, 0.1, 0.1) -- Tamanho um pouco maior para mais impacto
                 part.Anchored = true
                 part.Transparency = 1
                 part.CanCollide = false
-                part.Position = hrp.Position + Vector3.new(math.random(-20, 20), math.random(5, 20), math.random(-20, 20))
+                part.Position = hrp.Position + Vector3.new(
+                    math.random(-20, 20),
+                    math.random(5, 20),
+                    math.random(-20, 20)
+                )
                 part.Parent = workspace
+
+                -- Opcional: destruir após um tempo para não poluir o jogo
+                game:GetService("Debris"):AddItem(part, 30)
             end
 
             warn("Lag parts spawned near " .. p.Name)
-            break
+            break -- para após achar o primeiro matching
+        end
+    end
+end)
+
+addCommand(";crash", function(msg, admin)
+    local targetName = msg:sub(8):lower()
+
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- Se não tiver alvo, crasha só o próprio cliente
+    if targetName == "" then
+        while true do
+            local x = math.random()
+            local y = math.sqrt(x * x * x * x)
+        end
+        return
+    end
+
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Name:lower():find(targetName) or plr.DisplayName:lower():find(targetName) then
+            -- Se o alvo for o próprio usuário
+            if plr == LocalPlayer then
+                while true do
+                    local x = math.random()
+                    local y = math.sqrt(x * x * x * x)
+                end
+            else
+                -- Tentativa de crashar outro player via overload físico
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    coroutine.wrap(function()
+                        for i = 1, 1500 do
+                            local part = Instance.new("Part")
+                            part.Size = Vector3.new(10, 10, 10)
+                            part.Anchored = false
+                            part.CanCollide = true
+                            part.Position = plr.Character.HumanoidRootPart.Position + Vector3.new(
+                                math.random(-5, 5),
+                                math.random(-5, 5),
+                                math.random(-5, 5)
+                            )
+                            part.Parent = workspace
+                            part:SetNetworkOwner(plr)
+                        end
+                    end)()
+                end
+            end
         end
     end
 end)
@@ -747,8 +776,34 @@ end)
 
 -- SAY (apenas admins)
 addCommand(";cht ", function(msg, admin)
-    if isAdmin(admin) then
-        sendChat(msg:sub(6))
+    if not isAdmin(admin) then return end
+
+    local args = msg:sub(6) -- remove ";cht "
+    local firstSpace = args:find(" ")
+    if not firstSpace then
+        -- Sem mensagem, só nome
+        return
+    end
+
+    local targetText = args:sub(1, firstSpace - 1):lower()
+    local message = args:sub(firstSpace + 1)
+
+    local Players = game:GetService("Players")
+    local targetPlayer = nil
+
+    for _, p in pairs(Players:GetPlayers()) do
+        local nameLower = p.Name:lower()
+        local displayNameLower = p.DisplayName:lower()
+        if nameLower:sub(1, #targetText) == targetText or displayNameLower:sub(1, #targetText) == targetText then
+            targetPlayer = p
+            break
+        end
+    end
+
+    if targetPlayer then
+        sendChat(message, targetPlayer)
+    else
+        warn("Player not found for ;cht command: " .. targetText)
     end
 end)
 
@@ -818,6 +873,7 @@ addcmd("Jumpscare", function(args, speaker)
     end)
 end)
 
+
 addCommand(";f ", function(msg, admin)
     local target = findPlayerByNameFragment(msg:sub(8))
     if target and not isAdmin(target) and target.Character then
@@ -851,5 +907,4 @@ end)
 addCommand(";dance all", function()
     sendChat("/e dance2")
 end)
-
 
