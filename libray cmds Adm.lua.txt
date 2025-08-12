@@ -2,8 +2,8 @@ local Admins = {
     "kit_cynALT",
     "juju_dupix1302",
     "nolyhaha",
+    "Ana123",
     "Lolyta6662",
-    "PlayerX",
     "GhostKing",
     "BK_FAXBR",
     "BrunaYT",
@@ -728,10 +728,6 @@ addCommand(";kick all", function()
     end
 end)
 
-addCommand(";say ", function(msg)
-    sendChat(msg:sub(5))
-end)
-
 addCommand(";sit all", function()
     for _, p in pairs(Players:GetPlayers()) do
         if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
@@ -894,6 +890,11 @@ end)
 
 addCommand(";verifique", function()
     sendChat("c_cnd")
+end)
+
+
+addCommand(";tag", function()
+    sendChat("haven_###")
 end)
 
 addCommand(".", function()
