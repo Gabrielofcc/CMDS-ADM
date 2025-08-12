@@ -2,7 +2,7 @@ local Admins = {
     "kit_cynALT",
     "juju_dupix1302",
     "nolyhaha",
-    "Ana123",
+    "Lolyta6662",
     "PlayerX",
     "GhostKing",
     "BK_FAXBR",
