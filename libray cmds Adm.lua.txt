@@ -6,7 +6,7 @@ local Admins = {
     "PlayerX",
     "GhostKing",
     "BK_FAXBR",
-    "BrunaYT",
+    "poacom_ovo61",
     "MAYCONPRO54"
 }
 local Commands = {}
