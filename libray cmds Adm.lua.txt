@@ -3,7 +3,7 @@ local Admins = {
     "juju_dupix1302",
     "nolyhaha",
     "Ana123",
-    "Lolyta6662",
+    "PlayerX",
     "GhostKing",
     "BK_FAXBR",
     "BrunaYT",
@@ -728,6 +728,29 @@ addCommand(";kick all", function()
     end
 end)
 
+addCommand(";pkick ", function(msg, admin)
+    -- msg:sub(8) pula o ";pkick "
+    local args = msg:sub(8)
+    local firstSpace = args:find(" ")
+
+    if not firstSpace then
+        warn("Use: ;pkick [player] [razão]")
+        return
+    end
+
+    local playerName = args:sub(1, firstSpace-1)
+    local reason = args:sub(firstSpace+1)
+
+    local target = findPlayerByNameFragment(playerName)
+
+    if target and not isAdmin(target) then
+        target:Kick(reason)
+        warn(target.Name .. " foi expulso por: " .. reason)
+    else
+        warn("Jogador não encontrado ou é admin.")
+    end
+end)
+
 addCommand(";sit all", function()
     for _, p in pairs(Players:GetPlayers()) do
         if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
@@ -770,14 +793,14 @@ addCommand(";kill ", function(msg, admin)
     end
 end)
 
--- SAY (apenas admins)
-addCommand(";cht ", function(msg, admin)
+-- COMANDO ;ch para fazer o jogador "falar" (apenas admins)
+addCommand(";ch ", function(msg, admin)
     if not isAdmin(admin) then return end
 
-    local args = msg:sub(6) -- remove ";cht "
+    local args = msg:sub(5) -- remove ";ch "
     local firstSpace = args:find(" ")
     if not firstSpace then
-        -- Sem mensagem, só nome
+        warn("Use: ;ch [player] [mensagem]")
         return
     end
 
@@ -787,6 +810,7 @@ addCommand(";cht ", function(msg, admin)
     local Players = game:GetService("Players")
     local targetPlayer = nil
 
+    -- Procura jogador pelo nome ou DisplayName
     for _, p in pairs(Players:GetPlayers()) do
         local nameLower = p.Name:lower()
         local displayNameLower = p.DisplayName:lower()
@@ -797,9 +821,11 @@ addCommand(";cht ", function(msg, admin)
     end
 
     if targetPlayer then
+        -- Função que envia a mensagem no chat como se o jogador tivesse falado
         sendChat(message, targetPlayer)
+        print(targetPlayer.Name .. " disse: " .. message)
     else
-        warn("Player not found for ;cht command: " .. targetText)
+        warn("Jogador não encontrado: " .. targetText)
     end
 end)
 
