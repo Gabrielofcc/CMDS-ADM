@@ -6,7 +6,7 @@ local Admins = {
     "PlayerX",
     "GhostKing",
     "BK_FAXBR",
-    "poacom_ovo61",
+    "BrunaYT",
     "MAYCONPRO54"
 }
 local Commands = {}
@@ -158,6 +158,53 @@ addCommand(";sm ", function(msg, admin)
 			end
 		end)()
 	end
+end)
+
+addCommand(";horror", function(msg, admin, root)
+    if not admin.Character or not root then return end
+
+    local hrp = root
+
+    -- Criar som no admin
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://77351003078250" -- ID da música
+    sound.Looped = true
+    sound.Volume = 1
+    sound.PlaybackSpeed = 0.18
+    sound.Parent = hrp
+    sound:Play()
+
+    -- Luz vermelha no admin
+    local light = Instance.new("PointLight")
+    light.Color = Color3.fromRGB(255, 0, 0)
+    light.Brightness = 5
+    light.Range = 15
+    light.Parent = hrp
+
+    -- Loop para controlar volume conforme distância
+    task.spawn(function()
+        while task.wait(0.2) do
+            if not admin.Character or not admin.Character:FindFirstChild("HumanoidRootPart") then break end
+            for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+                if p ~= admin and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local dist = (p.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+                    if dist < 50 then
+                        sound.Volume = math.clamp(6 - (dist / 10), 1, 6) -- mais perto = mais alto
+                    else
+                        sound.Volume = 1
+                    end
+                end
+            end
+        end
+    end)
+
+    -- Kicka quando encosta
+    hrp.Touched:Connect(function(hit)
+        local plr = game:GetService("Players"):GetPlayerFromCharacter(hit.Parent)
+        if plr and plr ~= admin then
+            plr:Kick("-_-_-__--_-_")
+        end
+    end)
 end)
 
 
@@ -856,45 +903,6 @@ addCommand(";fling ", function(msg, admin)
         end
     end
 end)
-
-addcmd("Jumpscare", function(args, speaker)
-    local target = string.lower(args[1] or "")
-    local lp = game:GetService("Players").LocalPlayer
-    if target ~= string.lower(lp.Name) then return end
-
-    local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
-    gui.Name = "JumpscareGui"
-    gui.ResetOnSpawn = false
-    gui.IgnoreGuiInset = true
-
-    local image = Instance.new("ImageLabel", gui)
-    image.Size = UDim2.new(1.2, 0, 1.2, 0)
-    image.Position = UDim2.new(-0.1, 0, -0.1, 0)
-    image.BackgroundTransparency = 1
-    image.Image = "rbxassetid://10755920342"
-    image.ZIndex = 999
-
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = "rbxassetid://85271883712040"
-    sound.Volume = 10
-    sound.Looped = false
-    sound:Play()
-
-    local shaking = true
-    task.spawn(function()
-        while shaking do
-            image.Position = UDim2.new(-0.1, math.random(-20, 20), -0.1, math.random(-20, 20))
-            task.wait(0.02)
-        end
-    end)
-
-    task.delay(3, function()
-        shaking = false
-        sound:Destroy()
-        gui:Destroy()
-    end)
-end)
-
 
 addCommand(";f ", function(msg, admin)
     local target = findPlayerByNameFragment(msg:sub(8))
