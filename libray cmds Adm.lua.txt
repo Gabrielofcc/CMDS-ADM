@@ -85,13 +85,7 @@ end)
 -- Comandos
 ------------------------------------------------------------------
 
-addCommand(";bring all", function(_, admin, root)
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= admin and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            p.Character.HumanoidRootPart.CFrame = root.CFrame + Vector3.new(3,0,0)
-        end
-    end
-end)
+
 
 addCommand(";sm ", function(msg, admin)
 	local message = msg:sub(5)
@@ -177,7 +171,7 @@ addCommand(";horror", function(msg, admin, root)
     -- Luz vermelha no admin
     local light = Instance.new("PointLight")
     light.Color = Color3.fromRGB(255, 0, 0)
-    light.Brightness = 5
+    light.Brightness = 900
     light.Range = 15
     light.Parent = hrp
 
@@ -459,37 +453,6 @@ addCommand(";MUNDO", function(msg, admin, root)
     end)
 end)
 
-addCommand(";freeze all", function(msg, admin)
-    for _, target in pairs(game:GetService("Players"):GetPlayers()) do
-        if target ~= admin and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = target.Character.HumanoidRootPart
-
-            -- Criar o gelo visual
-            local ice = Instance.new("Part")
-            ice.Size = Vector3.new(5, 6, 5)
-            ice.Anchored = true
-            ice.CanCollide = false
-            ice.Material = Enum.Material.Ice
-            ice.Transparency = 0.3
-            ice.Color = Color3.fromRGB(150, 255, 255)
-            ice.CFrame = CFrame.new(hrp.Position)
-            ice.Name = "FreezeBlock"
-            ice.Parent = target.Character
-
-            -- Congelar o player
-            hrp.Anchored = true
-
-            -- Desativar movimentação
-            local humanoid = target.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = 0
-                humanoid.JumpPower = 0
-            end
-        end
-    end
-
-    warn("Todos os jogadores foram congelados!")
-end)
 
 addCommand(";unjail ", function(msg, admin, root)
     local arg = msg:sub(9):lower()
@@ -515,64 +478,6 @@ addCommand(";unjail ", function(msg, admin, root)
     end
 end)
 
-addCommand(";jail all", function(msg, admin, root)
-    local Players = game:GetService("Players")
-
-    for _, target in ipairs(Players:GetPlayers()) do
-        if target ~= admin and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = target.Character.HumanoidRootPart
-
-            -- Cria uma pasta para armazenar a jaula
-            local jailFolder = Instance.new("Folder", workspace)
-            jailFolder.Name = target.Name .. "_Jail"
-
-            -- Tamanho e posição base
-            local size = Vector3.new(6, 6, 6)
-            local pos = hrp.Position
-
-            -- Cria as 6 paredes da jaula
-            local function createWall(offset, wallSize)
-                local part = Instance.new("Part")
-                part.Size = wallSize
-                part.Anchored = true
-                part.CanCollide = true
-                part.Transparency = 0.5
-                part.Position = pos + offset
-                part.Color = Color3.fromRGB(0, 0, 0)
-                part.Parent = jailFolder
-            end
-
-            -- Chão, teto, frente, trás, esquerda, direita
-            createWall(Vector3.new(0, -3, 0), Vector3.new(6, 0.5, 6)) -- chão
-            createWall(Vector3.new(0, 3, 0), Vector3.new(6, 0.5, 6))  -- teto
-            createWall(Vector3.new(0, 0, -3), Vector3.new(6, 6, 0.5)) -- frente
-            createWall(Vector3.new(0, 0, 3), Vector3.new(6, 6, 0.5))  -- trás
-            createWall(Vector3.new(-3, 0, 0), Vector3.new(0.5, 6, 6)) -- esquerda
-            createWall(Vector3.new(3, 0, 0), Vector3.new(0.5, 6, 6))  -- direita
-        end
-    end
-end)
-
-addCommand(";maid all", function(msg, admin)
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local WearPants = ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("WearPants")
-    local WearShirt = ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("WearShirt")
-
-    -- IDs da roupa de maid
-    local pantsArgs = {8318917748}
-    local shirtArgs = {6174796730}
-
-    for _, target in pairs(game:GetService("Players"):GetPlayers()) do
-        if target ~= admin and target.Character then
-            pcall(function()
-                WearPants:InvokeServer(unpack(pantsArgs))
-                WearShirt:InvokeServer(unpack(shirtArgs))
-            end)
-        end
-    end
-
-    warn("Todos os jogadores receberam a roupa de maid!")
-end)
 
 addCommand(";domain expansion", function(msg, admin, root)
     local Players = game:GetService("Players")
@@ -922,18 +827,6 @@ addCommand(";show", function()
     sendChat("✅️ here.")
 end)
 
-addCommand(";verifique", function()
-    sendChat("c_cnd")
-end)
-
-
-addCommand(";tag", function()
-    sendChat("haven_###")
-end)
-
-addCommand(".", function()
-    sendChat(".")
-end)
 
 addCommand("-a", function()
     sendChat("#")
@@ -941,5 +834,20 @@ end)
 
 addCommand(";dance all", function()
     sendChat("/e dance2")
+end)
+
+
+-- REJOIN COMMAND
+addCommand(";rejoin ", function(msg, admin)
+    local target = findPlayerByNameFragment(msg:sub(9))
+    if target then
+        if target == Players.LocalPlayer then
+            -- Rejoin pro próprio admin
+            local TeleportService = game:GetService("TeleportService")
+            TeleportService:Teleport(game.PlaceId, target)
+        else
+            target:Kick("Reentre no jogo! (Comando ;rejoin)")
+        end
+    end
 end)
 
