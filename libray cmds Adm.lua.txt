@@ -851,3 +851,478 @@ addCommand(";rejoin ", function(msg, admin)
     end
 end)
 
+addCommand(";painel", function(msg, admin, root)
+    if not isAdmin(admin) then return end
+    
+    -- 🔹 Aqui vai o script que só o admin vê/roda
+    print("Executando painel só para:", admin.Name)
+
+
+    local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+local Window = WindUI:CreateWindow({
+    Title = "admin-cmds | 1.0 v2",
+    Icon = "shield",
+    Author = "ghost and Oriveira Dev",
+    Folder = "admfloher",
+    Size = UDim2.fromOffset(440, 360),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 190,
+    Background = "",
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = true,
+    ScrollBarEnabled = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            print("clicked")
+        end,
+    },
+})
+
+local MainSection = Window:Section({
+    Title = "Cmds : Player",
+    Icon = "package"
+})
+
+
+local Tab = MainSection:Tab({
+    Title = "All",
+    Icon = "info",
+    Opened = true
+})
+
+local Section = Tab:Section({ 
+    Title = "cmds All",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+-- BotÃµes de comandos em massa
+local comandosAll = {
+    {Titulo = "Bring All", Comando = "bring all"},
+    {Titulo = "Kill All", Comando = "kill all"},
+    {Titulo = "Kick All", Comando = "kick all"},
+    {Titulo = "Sit All", Comando = "sit all"},
+    {Titulo = "Lag All", Comando = "lag all"},
+    {Titulo = "Dance All", Comando = "dance all"},
+}
+
+for _, data in ipairs(comandosAll) do
+    Tab:Button({
+        Title = data.Titulo,
+        Desc = "Executa: ;" .. data.Comando,
+        Locked = false,
+        Callback = function()
+            local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+            if chat then
+                chat:SendAsync(";" .. data.Comando)
+            end
+        end
+    })
+end
+
+
+local Section = Tab:Section({ 
+    Title = "< News Cmds In SOON!",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+
+local Tab = MainSection:Tab({
+    Title = "Players",
+    Icon = "menu",
+    Opened = true
+})
+
+
+local Section = Tab:Section({ 
+    Title = "< Moderation",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Variável para armazenar o Player alvo
+local jogadorAlvo = nil
+local viewAtivo = false
+local loopView = nil
+
+-- Busca por nome/displayname parcial
+local function buscarJogador(nome)
+    nome = nome:lower()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Name:lower():sub(1, #nome) == nome or p.DisplayName:lower():sub(1, #nome) == nome then
+            return p
+        end
+    end
+end
+
+-- Input para selecionar jogador
+Tab:Input({
+    Title = "Selecionar Alvo",
+    Desc = "Digite nome ou apelido do jogador",
+    Placeholder = "Ex: zMario",
+    InputIcon = "user",
+    Type = "Input",
+    Callback = function(txt)
+        local achado = buscarJogador(txt)
+        if achado then
+            jogadorAlvo = achado -- guarda o Player, não só o nome
+            warn("Alvo selecionado: " .. jogadorAlvo.Name)
+        else
+            jogadorAlvo = nil
+            warn("Jogador não encontrado")
+        end
+    end
+})
+
+local Button = Tab:Button({
+    Title = "Teleportar",
+    Desc = "Teleporta até o jogador selecionado",
+    Locked = false,
+    Callback = function()
+        if jogadorAlvo and jogadorAlvo.Character and jogadorAlvo.Character:FindFirstChild("HumanoidRootPart") then
+            local myChar = LocalPlayer.Character
+            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                myChar:MoveTo(jogadorAlvo.Character.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
+                warn("Teleportado até: " .. jogadorAlvo.Name)
+            end
+        else
+            warn("Nenhum alvo válido selecionado!")
+        end
+    end
+})
+
+-- Função para ativar/desativar view
+local function setView(state)
+    viewAtivo = state
+    if not state then
+        -- Desliga e reseta
+        if loopView then
+            loopView:Disconnect()
+            loopView = nil
+        end
+        Camera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+        Camera.CameraType = Enum.CameraType.Custom
+    else
+        -- Loop para manter a view no alvo
+        loopView = game:GetService("RunService").RenderStepped:Connect(function()
+            if jogadorAlvo and jogadorAlvo.Character and jogadorAlvo.Character:FindFirstChild("Humanoid") then
+                Camera.CameraSubject = jogadorAlvo.Character.Humanoid
+            end
+        end)
+    end
+end
+
+-- Toggle na sua UI
+local Toggle = Tab:Toggle({
+    Title = "View",
+    Desc = "Espectar outro player",
+    Icon = "eye",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state) 
+        setView(state)
+        print("View -> " .. tostring(state))
+    end
+})
+
+-- Comandos direcionados ao jogador selecionado
+local Section = Tab:Section({
+    Title = "< Comandos TROLL >",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+Tab:Button({
+    Title = "Show : usuarios",
+    Desc = "Verificar si ha um player user fala here",
+    Locked = false,
+    Callback = function()
+        local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+        if chat then chat:SendAsync(";show") end
+    end
+})
+
+Tab:Button({
+    Title = "Show disfarÃ§ado",
+    Desc = "Verificar#",
+    Locked = false,
+    Callback = function()
+        local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+        if chat then chat:SendAsync(".") end
+    end
+})
+
+local Section = Tab:Section({
+    Title = "< cmds >",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+local comandosAlvo = {"kill", "bring", "fling", "crash", "dance", "maid", "freeze", "unfreeze", "jail", "unjail", "sit", "kick", "lag"}
+
+for _, cmd in ipairs(comandosAlvo) do
+    Tab:Button({
+        Title = cmd,
+        Desc = "usar ;" .. cmd .. " NOME",
+        Locked = false,
+        Callback = function()
+            if jogadorAlvo then
+                local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+                if chat then
+                    -- usa o Name do Player
+                    chat:SendAsync(";" .. cmd .. " " .. jogadorAlvo.Name)
+                end
+            else
+                warn("Nenhum jogador selecionado!")
+            end
+        end
+    })
+end
+
+Tab:Button({
+    Title = "Show users | melhor",
+    Desc = "ele adiciona tag em todos os usuarios Do Script",
+    Locked = false,
+    Callback = function()
+        local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+        if chat then chat:SendAsync(";verifique") end
+    end
+})
+
+Tab:Button({
+    Title = "Horror : usuarios",
+    Desc = "e tipo troll ele bota uma luz red em tu e daisy Music toca quem toca em tu leva kick",
+    Locked = false,
+    Callback = function()
+        local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+        if chat then chat:SendAsync(";horror") end
+    end
+})
+
+
+Tab:Button({
+    Title = "MUNDO",
+    Desc = "[NEW] REFERENCE JOJO range",
+    Locked = false,
+    Callback = function()
+        local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+        if chat then chat:SendAsync(";MUNDO") end
+    end
+})
+
+Tab:Button({
+    Title = "domain expansion",
+    Desc = "[NEW] REFERENCE Jujutiso Kaisen renge",
+    Locked = false,
+    Callback = function()
+        local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+        if chat then chat:SendAsync(";domain expansion") end
+    end
+})
+
+local Tab = MainSection:Tab({
+    Title = "Say ",
+    Icon = "message-circle",
+    Opened = true
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Variáveis globais
+local jogadorAlvo = nil
+local textoDigitado = ""
+
+-- Função para buscar jogador parcial
+local function buscarJogador(nome)
+    nome = nome:lower()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Name:lower():sub(1, #nome) == nome or p.DisplayName:lower():sub(1, #nome) == nome then
+            return p
+        end
+    end
+end
+
+-- Input para selecionar alvo
+Tab:Input({
+    Title = "Selecionar Alvo",
+    Desc = "Digite nome ou apelido do jogador",
+    Placeholder = "Ex: zMario",
+    InputIcon = "user",
+    Type = "Input",
+    Callback = function(txt)
+        local achado = buscarJogador(txt)
+        if achado then
+            jogadorAlvo = achado
+            warn("Alvo selecionado: " .. jogadorAlvo.Name)
+        else
+            jogadorAlvo = nil
+            warn("Jogador não encontrado")
+        end
+    end
+})
+
+-- Input para mensagem
+Tab:Input({
+    Title = "Mensagem",
+    Desc = "Digite algo para enviar",
+    Placeholder = "Ex: Olá!",
+    InputIcon = "message-square",
+    Type = "Input",
+    Callback = function(txt)
+        textoDigitado = txt
+    end
+})
+
+-- Botão para enviar
+Tab:Button({
+    Title = "Enviar Mensagem",
+    Desc = "Fala como ;ch [alvo] [mensagem]",
+    Locked = false,
+    Callback = function()
+        if jogadorAlvo and textoDigitado ~= "" then
+            local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+            if chat then
+                chat:SendAsync(";ch " .. jogadorAlvo.Name .. " " .. textoDigitado)
+            end
+        else
+            warn("Selecione um alvo e digite uma mensagem antes de enviar.")
+        end
+    end
+})
+
+local Section = Tab:Section({ 
+    Title = ";ms :Mensagem todos",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+
+local textoDigitado = ""
+
+Tab:Input({
+    Title = "Mensagem",
+    Desc = "Digite algo para enviar",
+    Placeholder = "Texto ms que sera enviado...",
+    InputIcon = "message-square",
+    Type = "Input",
+    Callback = function(txt)
+        textoDigitado = txt
+    end
+})
+
+Tab:Button({
+    Title = "Enviar Mensagem",
+    Desc = "mensagem Ms",
+    Locked = false,
+    Callback = function()
+        if textoDigitado ~= "" then
+            local chat = game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+            if chat then
+                chat:SendAsync(";ms " .. textoDigitado)
+            end
+        else
+            warn("Digite algo para falar.")
+        end
+    end
+})
+
+
+
+
+
+local Tab = MainSection:Tab({
+    Title = "Job-Id",
+    Icon = "user",
+    Opened = true
+})
+
+
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+
+local jobIdInput = ""
+
+Tab:Input({
+    Title = "JobId",
+    Desc = "Digite o JobId para teleportar",
+    Placeholder = "Ex: abc123-def456",
+    InputIcon = "hash",
+    Type = "Input",
+    Callback = function(txt)
+        jobIdInput = txt
+    end
+})
+
+Tab:Button({
+    Title = "Teleportar",
+    Desc = "Executa o teleport para o JobId informado",
+    Locked = false,
+    Callback = function()
+        local rawInput = jobIdInput or ""
+        rawInput = string.gsub(rawInput, "[`ðŸ“Ž]", "")
+        rawInput = string.gsub(rawInput, "JobId:?%s*", "")
+        rawInput = string.gsub(rawInput, "[^%w%-]", "") -- mantÃ©m sÃ³ letras, nÃºmeros e hÃ­fen
+
+        if rawInput == "" then
+            warn("JobId invÃ¡lido ou vazio!")
+            return
+        end
+
+        local PlaceId = game.PlaceId
+
+        TeleportService:TeleportToPlaceInstance(PlaceId, rawInput, Players.LocalPlayer)
+    end,
+})
+
+
+local MainSection = Window:Section({
+    Title = "Infos",
+    Icon = "door-open"
+})
+
+local Tab = MainSection:Tab({
+    Title = "Creditos",
+    Icon = "info",
+    Opened = true
+})
+
+local Section = Tab:Section({ 
+    Title = "Feito por Ghost e oriveiraDev",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+local Section = Tab:Section({ 
+    Title = "intuito :  e zoeira e diversão! n vai Zomba em",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+local Section = Tab:Section({ 
+    Title = "Havens script foi feito pra ajudar os users!!",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+local Section = Tab:Section({ 
+    Title = "ghost 2022 | epoca boa | vlw por ler",
+    TextXAlignment = "Left",
+    TextSize = 15,
+})
+
+
+-- Fundo
+Window:SetBackgroundImage("rbxassetid://8")
+Window:SetBackgroundImageTransparency(0.2)
+    
+end)
