@@ -10,7 +10,7 @@ local Admins = {
     "MAYCONPRO54"
 }
 local Commands = {}
-local lagging = false
+
 
 -- Serviços
 local Players = game:GetService("Players")
@@ -171,8 +171,8 @@ addCommand(";horror", function(msg, admin, root)
     -- Luz vermelha no admin
     local light = Instance.new("PointLight")
     light.Color = Color3.fromRGB(255, 0, 0)
-    light.Brightness = 900
-    light.Range = 15
+    light.Brightness = 9009
+    light.Range = 10
     light.Parent = hrp
 
     -- Loop para controlar volume conforme distância
@@ -267,42 +267,6 @@ addCommand(";kill all", function(_, admin)
     end
 end)
 
-addCommand(";lag ", function(msg, admin)
-    local targetText = msg:sub(6):lower()
-
-    for _, p in pairs(Players:GetPlayers()) do
-        local nameLower = p.Name:lower()
-        local displayNameLower = p.DisplayName:lower()
-
-        -- Verifica se o texto bate no começo do nome ou do displayName
-        if (nameLower:sub(1, #targetText) == targetText or displayNameLower:sub(1, #targetText) == targetText) 
-           and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = p.Character.HumanoidRootPart
-
-            -- Spawnar 1000 partes minúsculas invisíveis ao redor para lag
-            for i = 1, 1000 do
-                local part = Instance.new("Part")
-                part.Size = Vector3.new(0.1, 0.1, 0.1) -- Tamanho um pouco maior para mais impacto
-                part.Anchored = true
-                part.Transparency = 1
-                part.CanCollide = false
-                part.Position = hrp.Position + Vector3.new(
-                    math.random(-20, 20),
-                    math.random(5, 20),
-                    math.random(-20, 20)
-                )
-                part.Parent = workspace
-
-                -- Opcional: destruir após um tempo para não poluir o jogo
-                game:GetService("Debris"):AddItem(part, 30)
-            end
-
-            warn("Lag parts spawned near " .. p.Name)
-            break -- para após achar o primeiro matching
-        end
-    end
-end)
-
 addCommand(";crash", function(msg, admin)
     local targetName = msg:sub(8):lower()
 
@@ -351,12 +315,14 @@ addCommand(";crash", function(msg, admin)
 end)
 
 addCommand(";MUNDO", function(msg, admin, root)
+    print("adm is here")
+    
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
     local Debris = game:GetService("Debris")
 
     local radius = 50
-    local duration = 6
+    local duration = 7.1
 
     -- Cria esfera de energia
     local sphere = Instance.new("Part")
@@ -378,7 +344,7 @@ addCommand(";MUNDO", function(msg, admin, root)
     local textPart = Instance.new("Part")
     textPart.Anchored = true
     textPart.CanCollide = false
-    textPart.Transparency = 1
+    textPart.Transparency = 0.8
     textPart.CFrame = admin.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
     textPart.Parent = workspace
 
@@ -391,7 +357,7 @@ addCommand(";MUNDO", function(msg, admin, root)
     label.BackgroundTransparency = 1
     label.Text = "ZA WARUDO!"
     label.TextColor3 = Color3.fromRGB(255, 255, 0)
-    label.TextStrokeTransparency = 0
+    label.TextStrokeTransparency = 0.5
     label.TextScaled = true
     label.Font = Enum.Font.Arcade
 
@@ -686,7 +652,7 @@ addCommand(";pkick ", function(msg, admin)
     local firstSpace = args:find(" ")
 
     if not firstSpace then
-        warn("Use: ;pkick [player] [razão]")
+        print("erro")
         return
     end
 
@@ -697,7 +663,7 @@ addCommand(";pkick ", function(msg, admin)
 
     if target and not isAdmin(target) then
         target:Kick(reason)
-        warn(target.Name .. " foi expulso por: " .. reason)
+        game.Players.LocalPlayer.Character.Humanoid.Health = 0
     else
         warn("Jogador não encontrado ou é admin.")
     end
@@ -851,4 +817,3 @@ addCommand(";rejoin ", function(msg, admin)
     end
 end)
 
-    
