@@ -817,3 +817,30 @@ addCommand(";rejoin ", function(msg, admin)
     end
 end)
 
+-- Float
+addCommand(";float ", function(msg, admin)
+    local target = findPlayerByNameFragment(msg:sub(8))
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = target.Character.HumanoidRootPart
+
+        if not hrp:FindFirstChild("FloatVelocity") then
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "FloatVelocity"
+            bv.MaxForce = Vector3.new(0, 1e5, 0)
+            bv.Velocity = Vector3.new(0, 5, 0) -- sobe um pouco
+            bv.Parent = hrp
+        end
+    end
+end)
+
+-- Unfloat
+addCommand(";unfloat ", function(msg, admin)
+    local target = findPlayerByNameFragment(msg:sub(10))
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = target.Character.HumanoidRootPart
+        local bv = hrp:FindFirstChild("FloatVelocity")
+        if bv then
+            bv:Destroy()
+        end
+    end
+end)
