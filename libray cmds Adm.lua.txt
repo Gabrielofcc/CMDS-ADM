@@ -1,4 +1,4 @@
-Ghostplayer = "kit_cynALT"
+Ghostplayer = "xvdgdhgsgs"
 local Admins = {"xvdgdhgsgs","bestgamer_pogi2","EC_BOT1","FEWithoutEffort"}
 
 --[[ Commands List ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
