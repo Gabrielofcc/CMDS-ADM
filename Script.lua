@@ -2,8 +2,8 @@
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat558-uz/Testaaa/refs/heads/main/LibTeste.txt"))()
 
 local Window = redzlib:MakeWindow({
-    Title = "Havens Scripts | brookhaven",
-    SubTitle = "| beta script  GHOST ",
+    Title = "Astazinho DEV | brookhaven",
+    SubTitle = "| beta script  ASTA ",
     SaveFolder = "ConfigFolderArcs"
 })
 
@@ -7316,4 +7316,5 @@ loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-cool-fly-gu
 
 
 end})
+
 
