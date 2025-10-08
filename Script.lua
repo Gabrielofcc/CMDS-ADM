@@ -918,6 +918,7 @@ TabPlayers:AddToggle({
 })
 
 -- Função Annoy Player [FIXED] - AGORA MAIS FORTE
+-- Função Annoy Player [FIXED] - AGORA MAIS FORTE
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -930,24 +931,40 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- MÉTODO KILL INSTANTÂNEO: Força absurda + posição no void
+-- Função INVIS VOID [FIXED] - AGORA MAIS FORTE
+local function annoyPlayer(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
+        and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
+        or (LocalPlayer.Character:FindFirstChild("Assault")
+        and LocalPlayer.Character.Assault:FindFirstChild("GunScript_Local"))
+
+    if not gunScript then return end
+
+    local randomX = math.random(-1000000000, 1000000000)  
+    local randomY = math.random(50000000, 200000000)      
+    local randomZ = math.random(-1000000000, 1000000000)  
+
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(0, -1e10, 0),  -- Joga direto pro void
-        [4] = Vector3.new(0, -1e9, 0),   -- Posição no void
+        [3] = Vector3.new(randomX, randomY, randomZ), 
+        [4] = hrp.Position,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 100,  -- Dano máximo
-            [2] = Vector3.new(1000, 1000, 1000),
-            [3] = BrickColor.new("Really red"),
-            [4] = 1,
-            [5] = Enum.Material.Neon,
-            [6] = 1
+            [1] = 25,
+            [2] = Vector3.new(100, 100, 100),
+            [3] = BrickColor.new(29),
+            [4] = 0.25,
+            [5] = Enum.Material.SmoothPlastic,
+            [6] = 0.25
         },
         [11] = true,
         [12] = false
@@ -959,18 +976,17 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
--- Toggle "Annoy Player [BETA]" (MANTIDO COMO ESTAVA)
 TabPlayers:AddToggle({
-    Name = "Annoy Player [BETA]",
+    Name = "INVIS VOID [BETA]",
     Description = "quando o alvo andar F pra ele ! [isto e infinito so que ant Supera]",
     Default = false,
     Callback = function(state)
         if state then
             garantirArma(true)
             local loopId = {}
-            loopsAtivos["Annoy Player [BETA]"] = loopId
+            loopsAtivos["INVIS VOID [BETA]"] = loopId
             task.spawn(function()
-                while loopsAtivos["Annoy Player [BETA]"] == loopId do
+                while loopsAtivos["INVIS VOID [BETA]"] == loopId do
                     local targetPlayer = Players:FindFirstChild(selectedPlayer)
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
@@ -979,13 +995,13 @@ TabPlayers:AddToggle({
                 end
             end)
         else
-            loopsAtivos["Annoy Player [BETA]"] = nil
+            loopsAtivos["INVIS VOID [BETA]"] = nil
             garantirArma(false)
         end
     end
 })
 
-TabPlayers:AddSection({ " functions Target" })
+TabPlayers:AddSection({ "Funções alvo" })
 
 local cam = workspace.CurrentCamera
 local Players = game:GetService("Players")
@@ -993,7 +1009,7 @@ local LocalPlayer = Players.LocalPlayer
 local flingActive = false
 
 TabPlayers:AddToggle({
-    Name = "fling Croch",
+    Name = "fling Croch(sofá)",
     Description = "Faz o jogador voar com física bruta, usando delay e posição compensada.",
     Default = false,
     Callback = function(state)
