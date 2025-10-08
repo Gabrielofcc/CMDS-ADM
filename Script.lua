@@ -979,7 +979,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.01)  -- Loop mais rápido também
+                    task.wait(0.05)  -- Loop mais rápido também
                 end
             end)
         else
@@ -989,7 +989,7 @@ TabPlayers:AddToggle({
     end
 })
 
-TabPlayers:AddSection({ " função alvo"})
+TabPlayers:AddSection({ " functions Target" })
 
 local cam = workspace.CurrentCamera
 local Players = game:GetService("Players")
@@ -997,7 +997,7 @@ local LocalPlayer = Players.LocalPlayer
 local flingActive = false
 
 TabPlayers:AddToggle({
-    Name = "fling sofá",
+    Name = "fling Croch",
     Description = "Faz o jogador voar com física bruta, usando delay e posição compensada.",
     Default = false,
     Callback = function(state)
@@ -1071,7 +1071,7 @@ local LocalPlayer = Players.LocalPlayer
 local flingActive = false
 
 TabPlayers:AddToggle({
-    Name = "Fling melhorado",
+    Name = "Fling Fast",
     Description = "Faz o jogador voar rápido com física otimizada.",
     Default = false,
     Callback = function(state)
