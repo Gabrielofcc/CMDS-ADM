@@ -980,7 +980,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.05)  -- Loop mais rápido também
+                    task.wait(0.01)  -- Loop mais rápido também
                 end
             end)
         else
