@@ -931,8 +931,8 @@ local function annoyPlayer(targetPlayer)
     if not gunScript then return end
 
     -- posições aleatórias X e Z
-    local randomX = math.random(-90000000, 90000000)
-    local randomZ = math.random(-90000000, 90000000)
+    local randomX = math.random(-20000000, 20000000)
+    local randomZ = math.random(-20000000, 20000000)
 
     local args = {
         [1] = hrp,
