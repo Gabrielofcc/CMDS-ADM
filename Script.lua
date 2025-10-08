@@ -920,8 +920,10 @@ TabPlayers:AddToggle({
 -- Função Annoy Player [FIXED] - AGORA MAIS FORTE
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
+    local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    
+    if not humanoid or not hrp then return end
 
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
@@ -930,28 +932,24 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
-    local randomX = math.random(-50000000, 50000000)  -- Aumentado drasticamente
-    local randomZ = math.random(-50000000, 50000000)  -- Aumentado drasticamente
-    local randomY = math.random(1000000, 5000000)     -- Adicionada força vertical
-
+    -- Mata instantaneamente focando no humanoid
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(randomX, randomY, randomZ),  -- Força muito mais forte
-        [4] = hrp.Position,
+        [3] = Vector3.new(0, -9e9, 0),  -- Força vertical extrema pro void
+        [4] = Vector3.new(0, -1e6, 0),  -- Posição no void
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 25,
+            [1] = humanoid.Health + 1000,  -- Dano maior que a vida atual
             [2] = Vector3.new(100, 100, 100),
-            [3] = BrickColor.new(29),
-            [4] = 0.25,
-            [5] = Enum.Material.SmoothPlastic,
-            [6] = 0.25
+            [3] = BrickColor.new("Really black"),
+            [4] = 1,
+            [5] = Enum.Material.Neon,
+            [6] = 1
         },
         [11] = true,
         [12] = false
@@ -962,7 +960,6 @@ local function annoyPlayer(targetPlayer)
         event:FireServer(unpack(args))
     end
 end
-
 -- Toggle "Annoy Player [BETA]" (MANTIDO COMO ESTAVA)
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
@@ -7319,3 +7316,4 @@ loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-cool-fly-gu
 
 
 end})
+
