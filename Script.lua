@@ -917,7 +917,7 @@ TabPlayers:AddToggle({
     end
 })
 
--- Função Annoy Player [FIXED] - AGORA MAIS FORTE
+-- Função Annoy Player [BETA]
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -930,16 +930,15 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
-    local randomX = math.random(-99999999, 99999999)  -- Aumentado drasticamente
-    local randomZ = math.random(-99999999, 99999999)  -- Aumentado drasticamente
-    local randomY = math.random(9999999, 9999999)     -- Adicionada força vertical
+    -- posições aleatórias X e Z
+    local randomX = math.random(-20000000, 20000000)
+    local randomZ = math.random(-20000000, 20000000)
 
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(randomX, randomY, randomZ),  -- Força muito mais forte
-        [4] = hrp.Position,
+        [3] = Vector3.new(randomX, 0, randomZ),
+        [4] = hrp.Position, -- posição atual como referência
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
@@ -963,7 +962,7 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
--- Toggle "Annoy Player [BETA]" (MANTIDO COMO ESTAVA)
+-- Toggle "Annoy Player [BETA]"
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
     Description = "quando o alvo andar F pra ele ! [isto e infinito so que ant Supera]",
@@ -979,7 +978,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.05)  -- Loop mais rápido também
+                    task.wait(0.1) -- intervalo entre as posições
                 end
             end)
         else
