@@ -945,8 +945,8 @@ local function annoyPlayer(targetPlayer)
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 200,
-            [2] = Vector3.new(1000, 1000, 1000),
+            [1] = 25,
+            [2] = Vector3.new(100, 100, 100),
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
