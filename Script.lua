@@ -917,7 +917,7 @@ TabPlayers:AddToggle({
     end
 })
 
--- Função Annoy Player [FIXED] - AGORA MAIS FORTE
+-- Função Annoy Player [BETA] (SUA FUNÇÃO ATUAL)
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -930,15 +930,21 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
-    local randomX = math.random(-50000000, 50000000)  -- Aumentado drasticamente
-    local randomZ = math.random(-50000000, 50000000)  -- Aumentado drasticamente
-    local randomY = math.random(1000000, 5000000)     -- Adicionada força vertical
+    -- VERSÃO MELHOR - Direções alternadas (EVITA ANULAR FORÇAS)
+    local directions = {
+        Vector3.new(50000000, 5000000, 0),           -- Direita + Cima
+        Vector3.new(-50000000, 5000000, 0),          -- Esquerda + Cima  
+        Vector3.new(0, 5000000, 50000000),           -- Frente + Cima
+        Vector3.new(0, 5000000, -50000000),          -- Trás + Cima
+        Vector3.new(0, -50000000, 0),                -- Só pra BAIXO (aumentei a força)
+    }
+
+    local randomForce = directions[math.random(1, #directions)]
 
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(randomX, randomY, randomZ),  -- Força muito mais forte
+        [3] = randomForce,  -- Usa as direções alternadas
         [4] = hrp.Position,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
@@ -986,6 +992,65 @@ TabPlayers:AddToggle({
             loopsAtivos["Annoy Player [BETA]"] = nil
             garantirArma(false)
         end
+    end
+})
+
+-- FUNÇÃO PARA CONFIGURAR PERFIL HUB (COLOCADA AQUI COMO PEDIU)
+local function setupHubProfile()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Remote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eTex1t")
+    local ColorRemote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eColo1r")
+    
+    -- Configurar nome e bio
+    Remote:FireServer("RolePlayName", "Astazinho HUB [VERSÃO DEV OFC]")
+    Remote:FireServer("RolePlayBio", "Astazinho HUB [VERSÃO DEV OFC]")
+    
+    -- Função para cores RGB suaves
+    local function startSmoothRGB()
+        local time = 0
+        local rgbLoop = true
+        
+        task.spawn(function()
+            while rgbLoop do
+                -- Cores RGB suaves (transição lenta)
+                local r = math.sin(time * 0.5) * 0.5 + 0.5
+                local g = math.sin(time * 0.5 + 2) * 0.5 + 0.5
+                local b = math.sin(time * 0.5 + 4) * 0.5 + 0.5
+                
+                local color = Color3.new(r, g, b)
+                
+                -- Aplicar cores suaves
+                ColorRemote:FireServer("PickingRPNameColor", color)
+                ColorRemote:FireServer("PickingRPBioColor", color)
+                
+                -- Transição bem lenta (0.1 segundos entre cada mudança)
+                task.wait(0.1)
+                time = time + 0.05  -- Incremento pequeno para mudança suave
+            end
+        end)
+        
+        return function() rgbLoop = false end
+    end
+    
+    -- Iniciar cores RGB suaves
+    local stopRGB = startSmoothRGB()
+    
+    -- Notificação
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Astazinho HUB",
+        Text = "Perfil configurado com sucesso!",
+        Duration = 5
+    })
+    
+    return stopRGB
+end
+
+-- Botão para executar a configuração automática
+TabAvatar:AddButton({
+    Name = "Configurar Perfil HUB",
+    Description = "Configura automaticamente nome, bio e cores RGB suaves",
+    Callback = function()
+        setupHubProfile()
     end
 })
 
