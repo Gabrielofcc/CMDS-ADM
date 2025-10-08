@@ -931,8 +931,8 @@ local function annoyPlayer(targetPlayer)
     if not gunScript then return end
 
     -- posições aleatórias X e Z
-    local randomX = math.random(-20000000, 20000000)
-    local randomZ = math.random(-20000000, 20000000)
+    local randomX = math.random(-90000000, 90000000)
+    local randomZ = math.random(-90000000, 90000000)
 
     local args = {
         [1] = hrp,
@@ -945,8 +945,8 @@ local function annoyPlayer(targetPlayer)
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 200,
-            [2] = Vector3.new(1000, 1000, 1000),
+            [1] = 25,
+            [2] = Vector3.new(100, 100, 100),
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
@@ -962,7 +962,7 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
--- Toggle "Annoy Player [BETA]"
+-- Toggle "Annoy Player [BETA]" com tempo de 3 segundos
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
     Description = "quando o alvo andar F pra ele ! [isto e infinito so que ant Supera]",
@@ -972,13 +972,31 @@ TabPlayers:AddToggle({
             garantirArma(true)
             local loopId = {}
             loopsAtivos["Annoy Player [BETA]"] = loopId
+            
+            -- Tempo máximo de 3 segundos
+            local startTime = tick()
+            local maxTime = 3 -- 3 segundos
+            
             task.spawn(function()
-                while loopsAtivos["Annoy Player [BETA]"] == loopId do
+                while loopsAtivos["Annoy Player [BETA]"] == loopId and (tick() - startTime) < maxTime do
                     local targetPlayer = Players:FindFirstChild(selectedPlayer)
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
                     task.wait(0.1) -- intervalo entre as posições
+                end
+                
+                -- Desativa automaticamente após 3 segundos
+                if loopsAtivos["Annoy Player [BETA]"] == loopId then
+                    loopsAtivos["Annoy Player [BETA]"] = nil
+                    garantirArma(false)
+                    
+                    -- Notificação de término
+                    game:GetService("StarterGui"):SetCore("SendNotification", {
+                        Title = "Annoy Player",
+                        Text = "Tempo de 3 segundos acabou!",
+                        Duration = 3
+                    })
                 end
             end)
         else
@@ -6353,83 +6371,78 @@ function pegarSofa()
 	if sofa then
 		sofa.Parent = boneco
 		sofaEquipado = true
+		return sofa
 	end
+	return nil
 end
 
-function posAleatoriaAbaixo(boneco)
-	local rp = boneco:FindFirstChild("HumanoidRootPart")
-	if not rp then return Vector3.new() end
-	local offset = Vector3.new(math.random(-2, 2), -5.1, math.random(-2, 2))
-	return rp.Position + offset
-end
-
-function tpAbaixo(alvo)
-	if not alvo or not alvo.Character or not alvo.Character:FindFirstChild("HumanoidRootPart") then return end
-
-	local meuBoneco = eu.Character
-	local minhaRaiz = meuBoneco and meuBoneco:FindFirstChild("HumanoidRootPart")
-	local humano = meuBoneco and meuBoneco:FindFirstChildOfClass("Humanoid")
-
-	if not minhaRaiz or not humano then return end
-
-	humano:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-
-	if not base then
-		base = Instance.new("Part")
-		base.Size = Vector3.new(10, 1, 10)
-		base.Anchored = true
-		base.CanCollide = true
-		base.Transparency = 0.5
-		base.Parent = mundo
-	end
-
-	local destino = posAleatoriaAbaixo(alvo.Character)
-	base.Position = destino
-	minhaRaiz.CFrame = CFrame.new(destino)
-
-	humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+function fazerSofaIrSozinho(alvo)
+	if not alvo or not alvo.Character then return end
+	
+	local sofa = pegarSofa()
+	if not sofa then return end
+	
+	local alvoHRP = alvo.Character:FindFirstChild("HumanoidRootPart")
+	if not alvoHRP then return end
+	
+	-- Cria uma força para o sofá voar até o alvo
+	local bodyVelocity = Instance.new("BodyVelocity")
+	bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+	bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+	bodyVelocity.Parent = sofa.Handle or sofa:FindFirstChildWhichIsA("BasePart")
+	
+	-- Loop para fazer o sofá seguir o alvo
+	loopTP = loop.Heartbeat:Connect(function()
+		if not alvo or not alvo.Character or not alvoHRP.Parent then
+			limparSofa()
+			return
+		end
+		
+		-- Calcula direção para o alvo
+		local sofaPart = sofa.Handle or sofa:FindFirstChildWhichIsA("BasePart")
+		if sofaPart then
+			local direction = (alvoHRP.Position - sofaPart.Position).Unit
+			local distance = (alvoHRP.Position - sofaPart.Position).Magnitude
+			
+			-- Velocidade baseada na distância (mais rápido quando longe)
+			local speed = math.min(100, distance * 2)
+			bodyVelocity.Velocity = direction * speed
+			
+			-- Se estiver perto o suficiente, mata o alvo
+			if distance < 10 then
+				local buraco = CFrame.new(265.46, -450.83, -59.93)
+				alvoHRP.CFrame = buraco
+				task.wait(0.5)
+				limparSofa()
+				break
+			end
+		end
+	end)
+	
+	-- Timeout de segurança (15 segundos)
+	task.delay(15, function()
+		if loopTP then
+			limparSofa()
+		end
+	end)
 end
 
 function arremessarComSofa(alvo)
 	if not alvo then return end
 	nomeAlvo = alvo.Name
-	local boneco = eu.Character
-	if not boneco then return end
-
-	posInicial = boneco:FindFirstChild("HumanoidRootPart") and boneco.HumanoidRootPart.CFrame
-	raiz = boneco:FindFirstChild("HumanoidRootPart")
-	pegarSofa()
-
-	loopTP = loop.Heartbeat:Connect(function()
-		local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
-		if not alvoAtual or not alvoAtual.Character or not alvoAtual.Character:FindFirstChild("Humanoid") then
-			limparSofa()
-			return
-		end
-		if getgenv().AntiSit then
-			getgenv().AntiSit:Set(true)
-		end
-		tpAbaixo(alvoAtual)
-	end)
-
-	task.spawn(function()
-		local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
-		while alvoAtual and alvoAtual.Character and alvoAtual.Character:FindFirstChild("Humanoid") do
-			task.wait(0.05)
-			if alvoAtual.Character.Humanoid.SeatPart then
-				local buraco = CFrame.new(265.46, -450.83, -59.93)
-				alvoAtual.Character.HumanoidRootPart.CFrame = buraco
-				eu.Character.HumanoidRootPart.CFrame = buraco
-				task.wait(0.4)
-				limparSofa()
-				task.wait(0.2)
-				if posInicial then
-					eu.Character.HumanoidRootPart.CFrame = posInicial
-				end
-				break
-			end
-		end
-	end)
+	
+	posInicial = eu.Character and eu.Character:FindFirstChild("HumanoidRootPart") and eu.Character.HumanoidRootPart.CFrame
+	raiz = eu.Character and eu.Character:FindFirstChild("HumanoidRootPart")
+	
+	-- Agora o sofá vai sozinho, você fica no lugar
+	fazerSofaIrSozinho(alvo)
+	
+	-- Notificação
+	game:GetService("StarterGui"):SetCore("SendNotification", {
+		Title = "Sofá Voador",
+		Text = "Sofá indo até " .. alvo.Name,
+		Duration = 3
+	})
 end
 
 entrada.TouchTap:Connect(function(toques, processado)
