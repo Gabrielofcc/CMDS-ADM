@@ -930,23 +930,10 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
--- Função Annoy Player [FIXED] - AGORA MAIS FORTE
-local function annoyPlayer(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character then return end
-    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
-        and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
-        or (LocalPlayer.Character:FindFirstChild("Assault")
-        and LocalPlayer.Character.Assault:FindFirstChild("GunScript_Local"))
-
-    if not gunScript then return end
-
     -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
-    local randomX = math.random(-50000000, 50000000)  -- Aumentado drasticamente
-    local randomZ = math.random(-50000000, 50000000)  -- Aumentado drasticamente
-    local randomY = math.random(1000000, 5000000)     -- Adicionada força vertical
+    local randomX = math.random(-50000000, -50000000)  -- Aumentado drasticamente
+    local randomZ = math.random(-50000000, -50000000)  -- Aumentado drasticamente
+    local randomY = math.random(-1000000, -5000000)     -- Adicionada força vertical
 
     local args = {
         [1] = hrp,
