@@ -917,7 +917,7 @@ TabPlayers:AddToggle({
     end
 })
 
--- Função Annoy Player [BETA] (SUA FUNÇÃO ATUAL)
+-- Função Annoy Player [FIXED] - AGORA MAIS FORTE
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -992,65 +992,6 @@ TabPlayers:AddToggle({
             loopsAtivos["Annoy Player [BETA]"] = nil
             garantirArma(false)
         end
-    end
-})
-
--- FUNÇÃO PARA CONFIGURAR PERFIL HUB (COLOCADA AQUI COMO PEDIU)
-local function setupHubProfile()
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Remote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eTex1t")
-    local ColorRemote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eColo1r")
-    
-    -- Configurar nome e bio
-    Remote:FireServer("RolePlayName", "Astazinho HUB [VERSÃO DEV OFC]")
-    Remote:FireServer("RolePlayBio", "Astazinho HUB [VERSÃO DEV OFC]")
-    
-    -- Função para cores RGB suaves
-    local function startSmoothRGB()
-        local time = 0
-        local rgbLoop = true
-        
-        task.spawn(function()
-            while rgbLoop do
-                -- Cores RGB suaves (transição lenta)
-                local r = math.sin(time * 0.5) * 0.5 + 0.5
-                local g = math.sin(time * 0.5 + 2) * 0.5 + 0.5
-                local b = math.sin(time * 0.5 + 4) * 0.5 + 0.5
-                
-                local color = Color3.new(r, g, b)
-                
-                -- Aplicar cores suaves
-                ColorRemote:FireServer("PickingRPNameColor", color)
-                ColorRemote:FireServer("PickingRPBioColor", color)
-                
-                -- Transição bem lenta (0.1 segundos entre cada mudança)
-                task.wait(0.1)
-                time = time + 0.05  -- Incremento pequeno para mudança suave
-            end
-        end)
-        
-        return function() rgbLoop = false end
-    end
-    
-    -- Iniciar cores RGB suaves
-    local stopRGB = startSmoothRGB()
-    
-    -- Notificação
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Astazinho HUB",
-        Text = "Perfil configurado com sucesso!",
-        Duration = 5
-    })
-    
-    return stopRGB
-end
-
--- Botão para executar a configuração automática
-TabAvatar:AddButton({
-    Name = "Configurar Perfil HUB",
-    Description = "Configura automaticamente nome, bio e cores RGB suaves",
-    Callback = function()
-        setupHubProfile()
     end
 })
 
