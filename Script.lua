@@ -918,7 +918,6 @@ TabPlayers:AddToggle({
 })
 
 -- Função Annoy Player [FIXED] - AGORA MAIS FORTE
--- Função Annoy Player [FIXED] - AGORA MAIS FORTE
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
