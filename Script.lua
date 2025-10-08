@@ -932,9 +932,9 @@ local function annoyPlayer(targetPlayer)
 
     -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
 
-    local randomX = math.random(-100000000, 100000000)    -- DOBROU
+    local randomX = math.random(100000000, 100000000)    -- DOBROU
     local randomY = math.random(5000000, 20000000)        -- 4x MAIS FORTE
-    local randomZ = math.random(-100000000, 100000000)    -- DOBROU
+    local randomZ = math.random(100000000, 100000000)    -- DOBROU
 
     local args = {
         [1] = hrp,
