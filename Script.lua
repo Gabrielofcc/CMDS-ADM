@@ -978,7 +978,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.01) -- intervalo entre as posições
+                    task.wait(0.1) -- intervalo entre as posições
                 end
             end)
         else
