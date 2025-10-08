@@ -2,8 +2,8 @@
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat558-uz/Testaaa/refs/heads/main/LibTeste.txt"))()
 
 local Window = redzlib:MakeWindow({
-    Title = "Havens Scripts | brookhaven",
-    SubTitle = "| beta script  GHOST ",
+    Title = "Astazinho DEV | brookhaven",
+    SubTitle = "| beta script  ASTA ",
     SaveFolder = "ConfigFolderArcs"
 })
 
@@ -395,7 +395,7 @@ Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 12)
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.BackgroundTransparency = 1
-Title.Text = " SKY BOX [HAVENS]"
+Title.Text = " SKY BOX [Astazinho]"
 Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
@@ -2890,7 +2890,7 @@ TabLag:AddToggle({
 local loopGhostHunter = false
 
 TabLag:AddToggle({
-    Name = "Lag GhostHunter",
+    Name = "Lag AstaHunter",
     Default = false,
     Callback = function(v)
         loopGhostHunter = v
@@ -2900,7 +2900,7 @@ TabLag:AddToggle({
                 local Player = game.Players.LocalPlayer
                 local Character = Player.Character or Player.CharacterAdded:Wait()
                 local RootPart = Character:WaitForChild("HumanoidRootPart")
-                local GhostMeter = workspace.WorkspaceCom["001_GiveTools"]:FindFirstChild("GhostMeter")
+                local GhostMeter = workspace.WorkspaceCom["001_GiveTools"]:FindFirstChild("AstaMeter")
 
                 if GhostMeter and GhostMeter:FindFirstChild("ClickDetector") then
                     local OldPos = RootPart.CFrame
