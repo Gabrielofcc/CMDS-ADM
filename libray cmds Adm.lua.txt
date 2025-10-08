@@ -1,5 +1,5 @@
 Ghostplayer = "kit_cynALT"
-local Admins = {"Pxrple001","bestgamer_pogi2","EC_BOT1","FEWithoutEffort"}
+local Admins = {"xvdgdhgsgs","bestgamer_pogi2","EC_BOT1","FEWithoutEffort"}
 
 --[[ Commands List ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
