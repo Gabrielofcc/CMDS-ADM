@@ -931,10 +931,9 @@ local function annoyPlayer(targetPlayer)
     if not gunScript then return end
 
     -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
-
-    local randomX = math.random(100000000, 100000000)    -- DOBROU
-    local randomY = math.random(5000000, 20000000)        -- 4x MAIS FORTE
-    local randomZ = math.random(100000000, 100000000)    -- DOBROU
+    local randomX = math.random(-50000000, 50000000)  -- Aumentado drasticamente
+    local randomZ = math.random(-50000000, 50000000)  -- Aumentado drasticamente
+    local randomY = math.random(1000000, 5000000)     -- Adicionada força vertical
 
     local args = {
         [1] = hrp,
@@ -990,7 +989,7 @@ TabPlayers:AddToggle({
     end
 })
 
-TabPlayers:AddSection({ " functions Target" })
+TabPlayers:AddSection({ " função alvo"})
 
 local cam = workspace.CurrentCamera
 local Players = game:GetService("Players")
@@ -998,7 +997,7 @@ local LocalPlayer = Players.LocalPlayer
 local flingActive = false
 
 TabPlayers:AddToggle({
-    Name = "fling Croch",
+    Name = "fling sofá",
     Description = "Faz o jogador voar com física bruta, usando delay e posição compensada.",
     Default = false,
     Callback = function(state)
@@ -1072,7 +1071,7 @@ local LocalPlayer = Players.LocalPlayer
 local flingActive = false
 
 TabPlayers:AddToggle({
-    Name = "Fling Fast",
+    Name = "Fling melhorado",
     Description = "Faz o jogador voar rápido com física otimizada.",
     Default = false,
     Callback = function(state)
