@@ -930,21 +930,16 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- VERSÃO MELHOR - Direções alternadas (EVITA ANULAR FORÇAS)
-    local directions = {
-        Vector3.new(50000000, 5000000, 0),           -- Direita + Cima
-        Vector3.new(-50000000, 5000000, 0),          -- Esquerda + Cima  
-        Vector3.new(0, 5000000, 50000000),           -- Frente + Cima
-        Vector3.new(0, 5000000, -50000000),          -- Trás + Cima
-        Vector3.new(0, -50000000, 0),                -- Só pra BAIXO (aumentei a força)
-    }
+    -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
 
-    local randomForce = directions[math.random(1, #directions)]
+    local randomX = math.random(-100000000, 100000000)    -- DOBROU
+    local randomY = math.random(5000000, 20000000)        -- 4x MAIS FORTE
+    local randomZ = math.random(-100000000, 100000000)    -- DOBROU
 
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = randomForce,  -- Usa as direções alternadas
+        [3] = Vector3.new(randomX, randomY, randomZ),  -- Força muito mais forte
         [4] = hrp.Position,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
