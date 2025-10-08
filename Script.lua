@@ -931,10 +931,9 @@ local function annoyPlayer(targetPlayer)
     if not gunScript then return end
 
     -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
--- VERSÃO MATADORA - Só pra BAIXO
-    local randomX = math.random(-10000000, 10000000)   -- Pouco movimento lateral
-    local randomY = math.random(-50000000, -30000000)  -- ⬇️ SÓ PRA BAIXO (garantido)
-    local randomZ = math.random(-10000000, 10000000)   -- Pouco movimento lateral
+    local randomX = math.random(-50000000, 50000000)  -- Aumentado drasticamente
+    local randomZ = math.random(-50000000, 50000000)  -- Aumentado drasticamente
+    local randomY = math.random(1000000, 5000000)     -- Adicionada força vertical
 
     local args = {
         [1] = hrp,
