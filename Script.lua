@@ -917,99 +917,74 @@ TabPlayers:AddToggle({
     end
 })
 
-TabPlayers:AddButton({
-    Name = "Annoy Player [ONE SHOT]",
-    Callback = function()
-        if not selectedPlayer then
-            warn("Nenhum jogador selecionado!")
-            return
-        end
-        
-        local targetPlayer = Players:FindFirstChild(selectedPlayer)
-        if not targetPlayer then
-            warn("Jogador não encontrado!")
-            return
-        end
-        
-        -- Garantir que tem a arma
-        local function garantirArma()
-            local temAssault = (LocalPlayer.Backpack:FindFirstChild("Assault") or LocalPlayer.Character:FindFirstChild("Assault"))
-            if not temAssault then
-                local args = { "Assault", "StockAssault" }
-                ReplicatedStorage.Remotes.GunEquip:InvokeServer(unpack(args))
-                task.wait(0.5)
-            end
-        end
-        
-        -- Função do Annoy melhorada
-        local function annoyPlayerOneShot(targetPlayer)
-            if not targetPlayer or not targetPlayer.Character then return end
-            local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
+-- Função Annoy Player [BETA]
+local function annoyPlayer(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
-            local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
-                and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
-                or (LocalPlayer.Character:FindFirstChild("Assault")
-                and LocalPlayer.Character.Assault:FindFirstChild("GunScript_Local"))
+    local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
+        and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
+        or (LocalPlayer.Character:FindFirstChild("Assault")
+        and LocalPlayer.Character.Assault:FindFirstChild("GunScript_Local"))
 
-            if not gunScript then return end
+    if not gunScript then return end
 
-            -- Forças extremas
-            local randomX = math.random(-100000000, 100000000)
-            local randomZ = math.random(-100000000, 100000000)
-            local randomY = math.random(-50000000, -20000000)
+    -- posições aleatórias X e Z
+    local randomX = math.random(-20000000, 20000000)
+    local randomZ = math.random(-20000000, 20000000)
 
-            local args = {
-                [1] = hrp,
-                [2] = hrp,
-                [3] = Vector3.new(randomX, randomY, randomZ),
-                [4] = hrp.Position,
-                [5] = gunScript:FindFirstChild("MuzzleEffect"),
-                [6] = gunScript:FindFirstChild("HitEffect"),
-                [7] = 0,
-                [8] = 0,
-                [9] = { [1] = false },
-                [10] = {
-                    [1] = 100,
-                    [2] = Vector3.new(1000, 1000, 1000),
-                    [3] = BrickColor.new("Really red"),
-                    [4] = 1,
-                    [5] = Enum.Material.Neon,
-                    [6] = 1
-                },
-                [11] = true,
-                [12] = false
-            }
+    local args = {
+        [1] = hrp,
+        [2] = hrp,
+        [3] = Vector3.new(randomX, 0, randomZ),
+        [4] = hrp.Position, -- posição atual como referência
+        [5] = gunScript:FindFirstChild("MuzzleEffect"),
+        [6] = gunScript:FindFirstChild("HitEffect"),
+        [7] = 0,
+        [8] = 0,
+        [9] = { [1] = false },
+        [10] = {
+            [1] = 25,
+            [2] = Vector3.new(100, 100, 100),
+            [3] = BrickColor.new(29),
+            [4] = 0.25,
+            [5] = Enum.Material.SmoothPlastic,
+            [6] = 0.25
+        },
+        [11] = true,
+        [12] = false
+    }
 
-            local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
-            if event then
-                event:FireServer(unpack(args))
-            end
-        end
-        
-        -- Executar o processo
-        garantirArma()
-        
-        -- Bug ativo por 5 segundos
-        local startTime = tick()
-        local bugActive = true
-        
-        task.spawn(function()
-            while bugActive and (tick() - startTime) < 5 do
-                if targetPlayer and targetPlayer.Character then
-                    annoyPlayerOneShot(targetPlayer)
+    local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
+    if event then
+        event:FireServer(unpack(args))
+    end
+end
+
+-- Toggle "Annoy Player [BETA]"
+TabPlayers:AddToggle({
+    Name = "Annoy Player [BETA]",
+    Description = "quando o alvo andar F pra ele ! [isto e infinito so que ant Supera]",
+    Default = false,
+    Callback = function(state)
+        if state then
+            garantirArma(true)
+            local loopId = {}
+            loopsAtivos["Annoy Player [BETA]"] = loopId
+            task.spawn(function()
+                while loopsAtivos["Annoy Player [BETA]"] == loopId do
+                    local targetPlayer = Players:FindFirstChild(selectedPlayer)
+                    if targetPlayer then
+                        annoyPlayer(targetPlayer)
+                    end
+                    task.wait(0.1) -- intervalo entre as posições
                 end
-                task.wait(0.05) -- Loop rápido por 5 segundos
-            end
-            bugActive = false
-        end)
-        
-        -- Notificação
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Annoy Player [ONE SHOT]",
-            Text = "Bug ativo por 5 segundos em " .. targetPlayer.Name,
-            Duration = 5
-        })
+            end)
+        else
+            loopsAtivos["Annoy Player [BETA]"] = nil
+            garantirArma(false)
+        end
     end
 })
 
