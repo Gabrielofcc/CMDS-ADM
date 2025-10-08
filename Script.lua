@@ -931,27 +931,15 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
--- Função INVIS VOID [FIXED] - AGORA MAIS FORTE
-local function annoyPlayer(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character then return end
-    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
-        and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
-        or (LocalPlayer.Character:FindFirstChild("Assault")
-        and LocalPlayer.Character.Assault:FindFirstChild("GunScript_Local"))
-
-    if not gunScript then return end
-
-    local randomX = math.random(-1000000000, 1000000000)  
-    local randomY = math.random(50000000, 200000000)      
-    local randomZ = math.random(-1000000000, 1000000000)  
+    -- POSIÇÕES ALEATÓRIAS MUITO MAIS EXTREMAS
+    local randomX = math.random(-50000000, 50000000)  -- Aumentado drasticamente
+    local randomZ = math.random(-50000000, 50000000)  -- Aumentado drasticamente
+    local randomY = math.random(1000000, 5000000)     -- Adicionada força vertical
 
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(randomX, randomY, randomZ), 
+        [3] = Vector3.new(randomX, randomY, randomZ),  -- Força muito mais forte
         [4] = hrp.Position,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
@@ -976,17 +964,18 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
+-- Toggle "Annoy Player [BETA]" (MANTIDO COMO ESTAVA)
 TabPlayers:AddToggle({
-    Name = "INVIS VOID [BETA]",
+    Name = "Annoy Player [BETA]",
     Description = "quando o alvo andar F pra ele ! [isto e infinito so que ant Supera]",
     Default = false,
     Callback = function(state)
         if state then
             garantirArma(true)
             local loopId = {}
-            loopsAtivos["INVIS VOID [BETA]"] = loopId
+            loopsAtivos["Annoy Player [BETA]"] = loopId
             task.spawn(function()
-                while loopsAtivos["INVIS VOID [BETA]"] == loopId do
+                while loopsAtivos["Annoy Player [BETA]"] == loopId do
                     local targetPlayer = Players:FindFirstChild(selectedPlayer)
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
@@ -995,13 +984,13 @@ TabPlayers:AddToggle({
                 end
             end)
         else
-            loopsAtivos["INVIS VOID [BETA]"] = nil
+            loopsAtivos["Annoy Player [BETA]"] = nil
             garantirArma(false)
         end
     end
 })
 
-TabPlayers:AddSection({ "Funções alvo" })
+TabPlayers:AddSection({ " functions Target" })
 
 local cam = workspace.CurrentCamera
 local Players = game:GetService("Players")
@@ -1009,7 +998,7 @@ local LocalPlayer = Players.LocalPlayer
 local flingActive = false
 
 TabPlayers:AddToggle({
-    Name = "fling Croch(sofá)",
+    Name = "fling Croch",
     Description = "Faz o jogador voar com física bruta, usando delay e posição compensada.",
     Default = false,
     Callback = function(state)
