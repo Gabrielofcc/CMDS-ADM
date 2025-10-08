@@ -2,8 +2,8 @@
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat558-uz/Testaaa/refs/heads/main/LibTeste.txt"))()
 
 local Window = redzlib:MakeWindow({
-    Title = "Astazinho DEV | brookhaven",
-    SubTitle = "| beta script  ASTA ",
+    Title = "Havens Scripts | brookhaven",
+    SubTitle = "| beta script  GHOST ",
     SaveFolder = "ConfigFolderArcs"
 })
 
@@ -920,10 +920,8 @@ TabPlayers:AddToggle({
 -- Função Annoy Player [FIXED] - AGORA MAIS FORTE
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
-    local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    
-    if not humanoid or not hrp then return end
+    if not hrp then return end
 
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
@@ -932,21 +930,21 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- Mata instantaneamente focando no humanoid
+    -- MÉTODO KILL INSTANTÂNEO: Força absurda + posição no void
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(0, -9e9, 0),  -- Força vertical extrema pro void
-        [4] = Vector3.new(0, -1e6, 0),  -- Posição no void
+        [3] = Vector3.new(0, -1e10, 0),  -- Joga direto pro void
+        [4] = Vector3.new(0, -1e9, 0),   -- Posição no void
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = humanoid.Health + 1000,  -- Dano maior que a vida atual
-            [2] = Vector3.new(100, 100, 100),
-            [3] = BrickColor.new("Really black"),
+            [1] = 100,  -- Dano máximo
+            [2] = Vector3.new(1000, 1000, 1000),
+            [3] = BrickColor.new("Really red"),
             [4] = 1,
             [5] = Enum.Material.Neon,
             [6] = 1
@@ -960,6 +958,7 @@ local function annoyPlayer(targetPlayer)
         event:FireServer(unpack(args))
     end
 end
+
 -- Toggle "Annoy Player [BETA]" (MANTIDO COMO ESTAVA)
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
@@ -7314,7 +7313,4 @@ TabAnts:AddButton({"fly Universal ", function(Value)
 
 loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-cool-fly-gui-thing-22600"))()
 
-
 end})
-
-
