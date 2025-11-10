@@ -1252,23 +1252,24 @@ TabPlayers:AddButton({
         bv.Parent = Ball
 
         task.spawn(function()
-    local amplitude = 30 -- distância de subida/descida
-    local speed = 9e99      -- velocidade do ciclo (pode ajustar)
-    local baseOffsetY = -amplitude -- começa 30 studs abaixo do pé
+    local minOffset = -30 -- ponto mais baixo
+    local maxOffset = -1  -- ponto mais alto (pé do alvo)
+    local speed = 9e99       -- velocidade da oscilação
 
     while task.wait() do
         if not tchar:IsDescendantOf(Workspace) or thum.Health <= 0 then break end
 
         oscillationTime += RunService.Heartbeat:Wait()
 
-        -- movimento de vai e volta (suave)
-        local offsetY = math.sin(oscillationTime * speed) * amplitude
+        -- movimento de vai e volta entre minOffset e maxOffset
+        local sinValue = (math.sin(oscillationTime * speed) + 1) / 2 -- variação 0→1→0
+        local offsetY = minOffset + (maxOffset - minOffset) * sinValue
 
         -- previsão da posição do alvo
         local predictedPos = troot.Position + (troot.Velocity * 0.05)
 
-        -- posição final da bola (sobe e desce)
-        local basePos = predictedPos + Vector3.new(0, baseOffsetY + offsetY, 0)
+        -- aplica posição vertical da bola
+        local basePos = predictedPos + Vector3.new(0, offsetY, 0)
 
         Ball.CFrame = CFrame.new(basePos)
         Ball.Orientation += Vector3.new(360, 360, 360)
