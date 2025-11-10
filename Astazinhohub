@@ -1246,51 +1246,37 @@ TabPlayers:AddButton({
 
         local bv = Instance.new("BodyVelocity")
         bv.Name = "FlingPower"
-        bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+        bv.Velocity = Vector3.new(math.huge, math.huge, math.huge)
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         bv.P = 9e99
         bv.Parent = Ball
 
-        -- Movimento de subida 8 studs abaixo até o centro do alvo
-local startOffset = -8 -- abaixo do alvo
-local endOffset = 0    -- centro do alvo
-local attackPower = 9e99
-local moveSpeed = 9e99 -- velocidade da subida
+        -- Variáveis para movimento vertical (em vez de frente/trás)
+        local oscillationTime = 0
+        local oscillationSpeed = math.huge          -- velocidade da subida/descida
+        local oscillationDistance = 100       -- altura máxima da oscilação
+        local baseOffsetY = 0               -- posição base (baixo do pé)
 
-task.spawn(function()
-    local goingUp = true
-    local currentOffset = startOffset
+        task.spawn(function()
+            repeat
+                oscillationTime += RunService.Heartbeat:Wait()
 
-    repeat
-        local dt = RunService.Heartbeat:Wait()
+                -- movimento de subida e descida (seno)
+                local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
 
-        -- posição prevista do alvo
-        local predictedPos = troot.Position + (troot.Velocity * 0.2)
+                -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)
+                local predictedPos = troot.Position + (troot.Velocity * 0.8)
 
-        -- atualiza deslocamento (sobe ou desce)
-        if goingUp then
-            currentOffset += moveSpeed * dt
-            if currentOffset >= endOffset then
-                currentOffset = endOffset
-                goingUp = false
-            end
-        else
-            currentOffset -= moveSpeed * dt
-            if currentOffset <= startOffset then
-                currentOffset = startOffset
-                goingUp = true
-            end
-        end
+                -- posição final fica embaixo do alvo, oscilando pra cima/baixo
+                local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)
+                Ball.CFrame = CFrame.new(basePos)
 
-        -- define posição atual da bola
-        local targetPos = predictedPos + Vector3.new(0, currentOffset, 0)
-        Ball.CFrame = CFrame.new(targetPos, predictedPos)
+                -- rotação rápida invisível
+                Ball.Orientation += Vector3.new(360, 360, 360)
 
-        -- aplica impacto direto em direção ao centro do alvo
-        local direction = (predictedPos - Ball.Position).Unit
-        bv.Velocity = direction * attackPower
-    until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
-end)
+                task.wait(1/6000)
+            until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+        end)
     end
 })
 
