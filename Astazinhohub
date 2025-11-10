@@ -1253,7 +1253,7 @@ TabPlayers:AddButton({
 
         -- Movimento circular (30 studs em volta do alvo, qualquer direção)
 local radius = 30
-local angularSpeed = 15 -- velocidade da rotação
+local angularSpeed = 9e99 -- velocidade da rotação
 local timePassed = 0
 
 task.spawn(function()
