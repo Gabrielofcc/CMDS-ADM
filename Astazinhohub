@@ -975,7 +975,7 @@ local function annoyPlayer(targetPlayer)
             [6] = 0.25
         },
         [11] = true,
-        [12] = true
+        [12] = false
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
