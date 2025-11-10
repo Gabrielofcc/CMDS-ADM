@@ -1251,30 +1251,32 @@ TabPlayers:AddButton({
         bv.P = 9e99
         bv.Parent = Ball
 
+        -- Variáveis para movimento vertical (em vez de frente/trás)
+        local oscillationTime = 0
+        local oscillationSpeed = 9e99          -- velocidade da subida/descida
+        local oscillationDistance = -30       -- altura máxima da oscilação
+        local baseOffsetY = 0               -- posição base (baixo do pé)
+
         task.spawn(function()
-    local minOffset = -30 -- ponto mais baixo
-    local maxOffset = -1  -- ponto mais alto (pé do alvo)
-    local speed = 9e99       -- velocidade da oscilação
+            repeat
+                oscillationTime += RunService.Heartbeat:Wait()
 
-    while task.wait() do
-        if not tchar:IsDescendantOf(Workspace) or thum.Health <= 0 then break end
+                -- movimento de subida e descida (seno)
+                local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
 
-        oscillationTime += RunService.Heartbeat:Wait()
+                -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)
+                local predictedPos = troot.Position + (troot.Velocity * 0.8)
 
-        -- movimento de vai e volta entre minOffset e maxOffset
-        local sinValue = (math.sin(oscillationTime * speed) + 1) / 2 -- variação 0→1→0
-        local offsetY = minOffset + (maxOffset - minOffset) * sinValue
+                -- posição final fica embaixo do alvo, oscilando pra cima/baixo
+                local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)
+                Ball.CFrame = CFrame.new(basePos)
 
-        -- previsão da posição do alvo
-        local predictedPos = troot.Position + (troot.Velocity * 0.05)
+                -- rotação rápida invisível
+                Ball.Orientation += Vector3.new(360, 360, 360)
 
-        -- aplica posição vertical da bola
-        local basePos = predictedPos + Vector3.new(0, offsetY, 0)
-
-        Ball.CFrame = CFrame.new(basePos)
-        Ball.Orientation += Vector3.new(360, 360, 360)
-    end
-end)
+                task.wait(1/6000)
+            until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+        end)
     end
 })
 
