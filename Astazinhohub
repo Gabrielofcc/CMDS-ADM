@@ -918,12 +918,13 @@ TabPlayers:AddToggle({
 })
 
 -- Função principal de "Annoy Player [BETA]"
+-- Função principal de "Annoy Player [BETA]" (versão com empurrão forte)
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    -- pega a arma (Assault) e o script de disparo
+    -- garante que temos o script/arma local
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
         or (LocalPlayer.Character:FindFirstChild("Assault")
@@ -931,39 +932,56 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- posições aleatórias X e Z (grandes pra "confundir" servidor)
-    local randomX = math.random(-20000000, 20000000)
-    local randomZ = math.random(-20000000, 20000000)
+    local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
+    if not event then return end
 
-    -- micro variação no Y pra simular movimento (funciona mesmo parado)
+    -- origem (sua posição) — tenta usar HumanoidRootPart do jogador local
+    local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local originPos = myHRP and myHRP.Position or (hrp.Position + Vector3.new(0, 5, 0))
+
+    -- vetor direção do "empurrão": do origin para o alvo (unitizado)
+    local dir = (hrp.Position - originPos)
+    if dir.Magnitude == 0 then dir = Vector3.new(0,1,0) end
+    local unit = dir.Unit
+
+    -- força/direção exageradas (tweak aqui)
+    local hugeForceVector = unit * 1e6      -- escala grande na direção alvo
+    local hugeUpVector    = Vector3.new(0, 1e6, 0) -- empurra pra cima também
+
+    -- parâmetros "experimentais" — aumentei os valores que pareciam de força/phys
+    local baseForceAmount = 9e12   -- aumentei muito (era 9e9)
+    local physVector = hugeUpVector + hugeForceVector * 0.5
+
+    -- posição de "acerto" com micro variação no Y pra simular impacto
     local randomY = math.random(-1, 1) * 0.05
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
     local args = {
-        [1] = hrp,
-        [2] = hrp,
-        [3] = Vector3.new(randomX, 0, randomZ),
-        [4] = hitPos, -- posição com leve variação
+        [1] = hrp,            -- alvo (parte)
+        [2] = hrp,            -- possivelmente referência de hit
+        [3] = Vector3.new(math.random(-20000000,20000000), 0, math.random(-20000000,20000000)), -- coords aleatórias grandes para "confundir"
+        [4] = hitPos,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 9e9,
-            [2] = Vector3.new(0, 100, 0),
+            [1] = baseForceAmount,  -- magnitude base da força
+            [2] = physVector,       -- direção/força aplicada (vetor)
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
             [6] = 0.25
         },
-        [11] = true,
+        [11] = true,  -- flags extras (mantive true)
         [12] = false
     }
 
-    local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
-    if event then
-        event:FireServer(unpack(args))
+    -- dispara várias vezes com pequeno intervalo pra reforçar
+    for i = 1, 4 do
+        pcall(function() event:FireServer(unpack(args)) end)
+        task.wait(0.03) -- delay curtinho; pode ajustar (0.01 até 0.2)
     end
 end
 
