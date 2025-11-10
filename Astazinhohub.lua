@@ -2033,7 +2033,7 @@ TabPlayers:AddButton({
             return
         end
 
-        local targetPlayer = jogadores:FindFirstChild(TargetName)
+        local targetPlayer = jogadores:FindFirstChild(selectedPlayerName)
         if not targetPlayer then
             warn("Erro: Jogador alvo não encontrado")
             return
