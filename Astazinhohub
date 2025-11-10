@@ -1251,32 +1251,35 @@ TabPlayers:AddButton({
         bv.P = 9e99
         bv.Parent = Ball
 
-        -- Variáveis para movimento vertical (em vez de frente/trás)
-        local oscillationTime = 0
-        local oscillationSpeed = 9e99          -- velocidade da subida/descida
-        local oscillationDistance = 1       -- altura máxima da oscilação
-        local baseOffsetY = -20               -- posição base (baixo do pé)
+        -- Movimento circular (30 studs em volta do alvo, qualquer direção)
+local radius = 30
+local angularSpeed = 15 -- velocidade da rotação
+local timePassed = 0
 
-        task.spawn(function()
-            repeat
-                oscillationTime += RunService.Heartbeat:Wait()
+task.spawn(function()
+    local randomAngle = math.random() * math.pi * 2 -- direção inicial aleatória
 
-                -- movimento de subida e descida (seno)
-                local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
+    repeat
+        local dt = RunService.Heartbeat:Wait()
+        timePassed += dt * angularSpeed
 
-                -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)
-                local predictedPos = troot.Position + (troot.Velocity * 0.8)
+        -- previsão de movimento do alvo
+        local predictedPos = troot.Position + (troot.Velocity * 0.5)
 
-                -- posição final fica embaixo do alvo, oscilando pra cima/baixo
-                local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)
-                Ball.CFrame = CFrame.new(basePos)
+        -- posição circular ao redor do alvo
+        local x = math.cos(timePassed + randomAngle) * radius
+        local z = math.sin(timePassed + randomAngle) * radius
+        local targetPos = predictedPos + Vector3.new(x, 0, z)
 
-                -- rotação rápida invisível
-                Ball.Orientation += Vector3.new(360, 360, 360)
+        -- move a bola até a posição e aponta pro centro do alvo
+        Ball.CFrame = CFrame.new(targetPos, predictedPos)
 
-                task.wait(1/6000)
-            until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
-        end)
+        -- impacto constante (bola empurra sempre em direção ao alvo)
+        bv.Velocity = (predictedPos - Ball.Position).Unit * 9e9
+
+        task.wait(1/120)
+    until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+end)
     end
 })
 
