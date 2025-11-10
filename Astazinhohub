@@ -1251,33 +1251,35 @@ TabPlayers:AddButton({
         bv.P = 9e99
         bv.Parent = Ball
 
-        -- Movimento circular (30 studs em volta do alvo, qualquer direção)
+        -- Movimento de ataque direto (fling agressivo vindo de qualquer direção)
 local radius = 30
-local angularSpeed = 9e99 -- velocidade da rotação
-local timePassed = 0
+local attackSpeed = 9e9
+local waitTime = 0.05
 
 task.spawn(function()
-    local randomAngle = math.random() * math.pi * 2 -- direção inicial aleatória
-
     repeat
         local dt = RunService.Heartbeat:Wait()
-        timePassed += dt * angularSpeed
 
-        -- previsão de movimento do alvo
+        -- posição prevista do alvo
         local predictedPos = troot.Position + (troot.Velocity * 0.5)
 
-        -- posição circular ao redor do alvo
-        local x = math.cos(timePassed + randomAngle) * radius
-        local z = math.sin(timePassed + randomAngle) * radius
-        local targetPos = predictedPos + Vector3.new(x, 0, z)
+        -- gera uma direção aleatória de onde a bola vai vir (em volta do alvo)
+        local randomDir = Vector3.new(
+            math.random(-100, 100),
+            math.random(-30, 30),
+            math.random(-100, 100)
+        ).Unit
 
-        -- move a bola até a posição e aponta pro centro do alvo
-        Ball.CFrame = CFrame.new(targetPos, predictedPos)
+        -- posição inicial do ataque (30 studs longe do alvo)
+        local startPos = predictedPos + (randomDir * radius)
+        Ball.CFrame = CFrame.new(startPos)
 
-        -- impacto constante (bola empurra sempre em direção ao alvo)
-        bv.Velocity = (predictedPos - Ball.Position).Unit * 9e9
+        -- define o vetor de velocidade direto pro alvo
+        local direction = (predictedPos - Ball.Position).Unit
+        bv.Velocity = direction * attackSpeed
 
-        task.wait(1/120)
+        -- espera um curto tempo antes de atacar novamente
+        task.wait(waitTime)
     until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
 end)
     end
