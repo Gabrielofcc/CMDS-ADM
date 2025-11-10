@@ -1251,36 +1251,36 @@ TabPlayers:AddButton({
         bv.P = 9e99
         bv.Parent = Ball
 
-        -- Movimento de ataque direto (fling agressivo vindo de qualquer direção)
+        -- Ataque direto pro centro do alvo (fling real)
 local radius = 30
-local attackSpeed = 9e9
-local waitTime = 0.05
+local attackPower = 9e99
+local waitTime = 0.02
 
 task.spawn(function()
-    repeat
-        local dt = RunService.Heartbeat:Wait()
+	repeat
+		RunService.Heartbeat:Wait()
 
-        -- posição prevista do alvo
-        local predictedPos = troot.Position + (troot.Velocity * 0.5)
+		-- posição central do alvo
+		local center = troot.Position
 
-        -- gera uma direção aleatória de onde a bola vai vir (em volta do alvo)
-        local randomDir = Vector3.new(
-            math.random(-100, 100),
-            math.random(-30, 30),
-            math.random(-100, 100)
-        ).Unit
+		-- cria uma direção aleatória de onde a bola vem
+		local randomDir = Vector3.new(
+			math.random(-100, 100),
+			math.random(-30, 30),
+			math.random(-100, 100)
+		).Unit
 
-        -- posição inicial do ataque (30 studs longe do alvo)
-        local startPos = predictedPos + (randomDir * radius)
-        Ball.CFrame = CFrame.new(startPos)
+		-- define a posição inicial (30 studs do centro)
+		local startPos = center + (randomDir * radius)
+		Ball.CFrame = CFrame.new(startPos, center)
 
-        -- define o vetor de velocidade direto pro alvo
-        local direction = (predictedPos - Ball.Position).Unit
-        bv.Velocity = direction * attackSpeed
+		-- faz a bola disparar pro centro do alvo
+		local direction = (center - Ball.Position).Unit
+		bv.Velocity = direction * attackPower
 
-        -- espera um curto tempo antes de atacar novamente
-        task.wait(waitTime)
-    until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+		-- espera um instante antes de repetir o ataque
+		task.wait(waitTime)
+	until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
 end)
     end
 })
