@@ -917,13 +917,12 @@ TabPlayers:AddToggle({
     end
 })
 
--- Função principal de "Annoy Player [BETA]"
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    -- pega a arma (Assault) e o script de disparo
+    -- pega a arma
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
         or (LocalPlayer.Character:FindFirstChild("Assault")
@@ -931,19 +930,33 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- posições aleatórias X e Z (grandes pra "confundir" servidor)
     local randomX = math.random(-20000000, 20000000)
     local randomZ = math.random(-20000000, 20000000)
-
-    -- micro variação no Y pra simular movimento (funciona mesmo parado)
     local randomY = math.random(-5, 5) * 0.05
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
+
+    -- aplica força pra "andar"
+    local humanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid and hrp then
+        local bodyVel = hrp:FindFirstChild("AnnoyWalk")
+        if not bodyVel then
+            bodyVel = Instance.new("BodyVelocity")
+            bodyVel.Name = "AnnoyWalk"
+            bodyVel.MaxForce = Vector3.new(4000, 0, 4000)
+            bodyVel.Velocity = hrp.CFrame.LookVector * 6
+            bodyVel.Parent = hrp
+        else
+            local randomDir = Vector3.new(math.random(-1,1), 0, math.random(-1,1)).Unit
+            bodyVel.Velocity = (hrp.CFrame.LookVector + randomDir * 0.3) * 6
+        end
+        game.Debris:AddItem(bodyVel, 0.4)
+    end
 
     local args = {
         [1] = hrp,
         [2] = hrp,
         [3] = Vector3.new(randomX, 0, randomZ),
-        [4] = hitPos, -- posição com leve variação
+        [4] = hitPos,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
@@ -967,11 +980,10 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
-
 -- Toggle principal
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
-    Description = "quando o alvo andar F pra ele ! [isto e infinito, ant supera]",
+    Description = "Empurra o alvo enquanto aplica o annoy",
     Default = false,
     Callback = function(state)
         if state then
@@ -985,7 +997,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.1) -- intervalo entre execuções
+                    task.wait(0.1)
                 end
             end)
         else
