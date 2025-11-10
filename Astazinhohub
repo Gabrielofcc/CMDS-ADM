@@ -1251,36 +1251,45 @@ TabPlayers:AddButton({
         bv.P = 9e99
         bv.Parent = Ball
 
-        -- Ataque direto pro centro do alvo (fling real)
-local radius = 30
+        -- Movimento de subida 8 studs abaixo até o centro do alvo
+local startOffset = -8 -- abaixo do alvo
+local endOffset = 0    -- centro do alvo
 local attackPower = 9e99
-local waitTime = 0.02
+local moveSpeed = 9e99 -- velocidade da subida
 
 task.spawn(function()
-	repeat
-		RunService.Heartbeat:Wait()
+    local goingUp = true
+    local currentOffset = startOffset
 
-		-- posição central do alvo
-		local center = troot.Position
+    repeat
+        local dt = RunService.Heartbeat:Wait()
 
-		-- cria uma direção aleatória de onde a bola vem
-		local randomDir = Vector3.new(
-			math.random(-100, 100),
-			math.random(-30, 30),
-			math.random(-100, 100)
-		).Unit
+        -- posição prevista do alvo
+        local predictedPos = troot.Position + (troot.Velocity * 0.2)
 
-		-- define a posição inicial (30 studs do centro)
-		local startPos = center + (randomDir * radius)
-		Ball.CFrame = CFrame.new(startPos, center)
+        -- atualiza deslocamento (sobe ou desce)
+        if goingUp then
+            currentOffset += moveSpeed * dt
+            if currentOffset >= endOffset then
+                currentOffset = endOffset
+                goingUp = false
+            end
+        else
+            currentOffset -= moveSpeed * dt
+            if currentOffset <= startOffset then
+                currentOffset = startOffset
+                goingUp = true
+            end
+        end
 
-		-- faz a bola disparar pro centro do alvo
-		local direction = (center - Ball.Position).Unit
-		bv.Velocity = direction * attackPower
+        -- define posição atual da bola
+        local targetPos = predictedPos + Vector3.new(0, currentOffset, 0)
+        Ball.CFrame = CFrame.new(targetPos, predictedPos)
 
-		-- espera um instante antes de repetir o ataque
-		task.wait(waitTime)
-	until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+        -- aplica impacto direto em direção ao centro do alvo
+        local direction = (predictedPos - Ball.Position).Unit
+        bv.Velocity = direction * attackPower
+    until thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
 end)
     end
 })
