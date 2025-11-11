@@ -920,7 +920,6 @@ TabPlayers:AddToggle({
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
     if not hrp then return end
 
     -- pega a arma
@@ -936,36 +935,18 @@ local function annoyPlayer(targetPlayer)
     local randomY = math.random(-1, 1) * 0.01
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
-    -- 🔹 força o alvo a "andar" com impacto mais forte e empurrão para baixo
-    if not hrp:FindFirstChild("AnnoyWalk") then
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "AnnoyWalk"
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- força alta o suficiente
-        bv.Velocity = (hrp.CFrame.LookVector * 25) + Vector3.new(0, -9e99, 0) -- empurra pra frente e pra baixo
-        bv.P = 5000
-        bv.Parent = hrp
-        game.Debris:AddItem(bv, 0.15) -- tempo ligeiramente maior para garantir efeito
-    else
-        local bv = hrp:FindFirstChild("AnnoyWalk")
-        bv.Velocity = (hrp.CFrame.LookVector * 25) + Vector3.new(0, -40, 0)
-    end
-
-    -- 🔸 tenta forçar o personagem a “cair” (derrubar visualmente)
-    if humanoid then
-        pcall(function()
-            humanoid.PlatformStand = true
-            humanoid:ChangeState(Enum.HumanoidStateType.FallingDown)
-        end)
-
-        -- restaura após curto tempo pra não travar
-        task.delay(0.5, function()
-            if humanoid then
-                pcall(function()
-                    humanoid.PlatformStand = false
-                end)
-            end
-        end)
-    end
+    -- 🔹 força o alvo a "andar" usando BodyVelocity com mais impacto
+if not hrp:FindFirstChild("AnnoyWalk") then
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "AnnoyWalk"
+    bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
+    bv.Velocity = hrp.CFrame.LookVector * 9e99   -- empurra 3x mais rápido
+    bv.Parent = hrp
+    game.Debris:AddItem(bv, 0.1)               -- dura mais tempo
+else
+    local bv = hrp:FindFirstChild("AnnoyWalk")
+    bv.Velocity = hrp.CFrame.LookVector * 9e99
+end
 
     -- executa o efeito de tiro (annoy)
     local args = {
@@ -980,14 +961,14 @@ local function annoyPlayer(targetPlayer)
         [9] = { [1] = false },
         [10] = {
             [1] = 9e99,
-            [2] = Vector3.new(0, 9e99, 0),
+            [2] = Vector3.new(9e99, 9e99, 9e99),
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
             [6] = 0.25
         },
         [11] = true,
-        [12] = true
+        [12] = false
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
