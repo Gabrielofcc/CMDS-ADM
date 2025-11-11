@@ -850,7 +850,7 @@ end
 criarToggle("Glitch Player (FE)", 0.05)
 criarToggle("Lag Player (FE)", 1)
 
--- Função que executa o "Stuck Player"
+-- Função "Lag Player (FE)" - cria efeito de lag visual no alvo
 local function stuckPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -863,31 +863,43 @@ local function stuckPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    local args = {
-        [1] = hrp,
-        [2] = hrp,
-        [3] = Vector3.new(0, -50000, 0), -- Força para BAIXO (valor mais realista)
-        [4] = hrp.Position, -- Usa a posição atual do alvo
-        [5] = gunScript:FindFirstChild("MuzzleEffect"),
-        [6] = gunScript:FindFirstChild("HitEffect"),
-        [7] = 0,
-        [8] = 0,
-        [9] = { [1] = false },
-        [10] = {
-            [1] = 25,
-            [2] = Vector3.new(100, 100, 100),
-            [3] = BrickColor.new(29),
-            [4] = 0.25,
-            [5] = Enum.Material.SmoothPlastic,
-            [6] = 0.25
-        },
-        [11] = true,
-        [12] = false
-    }
-
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
-    if event then
+    if not event then return end
+
+    -- parâmetros para o "lag visual"
+    local spamCount = 9999999         -- quantas vezes vai disparar seguidamente
+    local spamDelay = 0.01       -- intervalo entre cada envio (menor = mais lag)
+    local forcePower =  Vector3.new(0, -15000, 0)  -- força suave para baixo (mantém preso)
+    
+    for i = 1, spamCount do
+        local args = {
+            [1] = hrp,
+            [2] = hrp,
+            [3] = forcePower + Vector3.new(
+                math.random(-500, 500),
+                math.random(-300, 300),
+                math.random(-500, 500)
+            ), -- força variável para gerar o "tremor"
+            [4] = hrp.Position,
+            [5] = gunScript:FindFirstChild("MuzzleEffect"),
+            [6] = gunScript:FindFirstChild("HitEffect"),
+            [7] = 0,
+            [8] = 0,
+            [9] = { [1] = false },
+            [10] = {
+                [1] = 10,  
+                [2] = Vector3.new(50, 50, 50),
+                [3] = BrickColor.new("Really black"),
+                [4] = 0.2,
+                [5] = Enum.Material.SmoothPlastic,
+                [6] = 0.2
+            },
+            [11] = true,
+            [12] = false
+        }
+
         event:FireServer(unpack(args))
+        task.wait(spamDelay)
     end
 end
 
