@@ -940,12 +940,12 @@ if not hrp:FindFirstChild("AnnoyWalk") then
     local bv = Instance.new("BodyVelocity")
     bv.Name = "AnnoyWalk"
     bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
-    bv.Velocity = hrp.CFrame.LookVector * 9e99   -- empurra 3x mais rápido
+    bv.Velocity = hrp.CFrame.LookVector * 12   -- empurra 3x mais rápido
     bv.Parent = hrp
     game.Debris:AddItem(bv, 0.1)               -- dura mais tempo
 else
     local bv = hrp:FindFirstChild("AnnoyWalk")
-    bv.Velocity = hrp.CFrame.LookVector * 9e99
+    bv.Velocity = hrp.CFrame.LookVector * 12
 end
 
     -- executa o efeito de tiro (annoy)
@@ -961,14 +961,14 @@ end
         [9] = { [1] = false },
         [10] = {
             [1] = 9e99,
-            [2] = Vector3.new(9e99, 9e99, 9e99),
+            [2] = Vector3.new(0, 9e99, 0),
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
             [6] = 0.25
         },
         [11] = true,
-        [12] = false
+        [12] = true
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
