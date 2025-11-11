@@ -922,10 +922,12 @@ local function annoyPlayer(targetPlayer)
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
+    -- pega a arma
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
         or (LocalPlayer.Character:FindFirstChild("Assault")
         and LocalPlayer.Character.Assault:FindFirstChild("GunScript_Local"))
+
     if not gunScript then return end
 
     local randomX = math.random(-20000000, 20000000)
@@ -933,29 +935,20 @@ local function annoyPlayer(targetPlayer)
     local randomY = math.random(-1, 1) * 0.01
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
-    -- 🔹 Movimento mais forte e persistente
-    local bv = hrp:FindFirstChild("AnnoyWalk")
-    if not bv then
-        bv = Instance.new("BodyVelocity")
+    -- 🔹 força o alvo a "andar" usando BodyVelocity
+    if not hrp:FindFirstChild("AnnoyWalk") then
+        local bv = Instance.new("BodyVelocity")
         bv.Name = "AnnoyWalk"
-        bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força bem mais alta
-        bv.Velocity = Vector3.zero
+        bv.MaxForce = Vector3.new(4000, 0, 4000)
+        bv.Velocity = hrp.CFrame.LookVector * 4
         bv.Parent = hrp
+        game.Debris:AddItem(bv, 0.3)
+    else
+        local bv = hrp:FindFirstChild("AnnoyWalk")
+        bv.Velocity = hrp.CFrame.LookVector * 4
     end
 
-    -- alterna direção aleatória
-    local randomDir = (hrp.CFrame.LookVector * math.random(2, 6))
-        + Vector3.new(math.random(-5,5) * 0.5, 0, math.random(-5,5) * 0.5)
-    bv.Velocity = randomDir
-
-    -- pequeno impulso vertical pra destravar
-    if math.random(1, 3) == 1 then
-        hrp.AssemblyLinearVelocity = hrp.AssemblyLinearVelocity + Vector3.new(0, 9e99, 0)
-    end
-
-    game.Debris:AddItem(bv, 0.6) -- mantém mais tempo vivo
-
-    -- efeito annoy (disparo visual)
+    -- executa o efeito de tiro (annoy)
     local args = {
         [1] = hrp,
         [2] = hrp,
@@ -975,7 +968,7 @@ local function annoyPlayer(targetPlayer)
             [6] = 0.25
         },
         [11] = true,
-        [12] = false
+        [12] = true
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
@@ -984,10 +977,10 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
-
+-- toggle principal
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
-    Description = "Mantém o alvo em movimento constante e levando annoy",
+    Description = "Mantém o alvo se mexendo e levando annoy constantemente",
     Default = false,
     Callback = function(state)
         if state then
@@ -1001,7 +994,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.01)
+                    task.wait(0.15)
                 end
             end)
         else
