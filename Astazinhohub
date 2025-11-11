@@ -942,7 +942,7 @@ if not hrp:FindFirstChild("AnnoyWalk") then
     bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
     bv.Velocity = hrp.CFrame.LookVector * 12   -- empurra 3x mais rápido
     bv.Parent = hrp
-    game.Debris:AddItem(bv, 4)               -- dura mais tempo
+    game.Debris:AddItem(bv, 0.01)               -- dura mais tempo
 else
     local bv = hrp:FindFirstChild("AnnoyWalk")
     bv.Velocity = hrp.CFrame.LookVector * 12
