@@ -933,15 +933,15 @@ local function annoyPlayer(targetPlayer)
     local randomY = math.random(-1, 1) * 0.01
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
-    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-if hrp then
-    local bv = Instance.new("BodyVelocity")
-    bv.Name = "PushForce"
-    bv.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- força bem alta
-    bv.Velocity = hrp.CFrame.LookVector * 100 -- empurra pra trás do alvo
-    bv.P = 9e9 -- poder da força
-    bv.Parent = hrp
-end
+    -- 🔹 Movimento mais forte e persistente
+    local bv = hrp:FindFirstChild("AnnoyWalk")
+    if not bv then
+        bv = Instance.new("BodyVelocity")
+        bv.Name = "AnnoyWalk"
+        bv.MaxForce = Vector3.new(9e99, 9e99, 9e99) 
+        bv.Velocity = Vector3.zero
+        bv.Parent = hrp
+    end
 
     -- alterna direção aleatória
     local randomDir = (hrp.CFrame.LookVector * math.random(2, 6))
@@ -950,7 +950,7 @@ end
 
     -- pequeno impulso vertical pra destravar
     if math.random(1, 3) == 1 then
-        hrp.AssemblyLinearVelocity = hrp.AssemblyLinearVelocity + Vector3.new(9e99, 9e99, 9e99)
+        hrp.AssemblyLinearVelocity = hrp.AssemblyLinearVelocity + Vector3.new(0, 9e99, 0)
     end
 
     game.Debris:AddItem(bv, 0.9) -- mantém mais tempo vivo
@@ -959,7 +959,7 @@ end
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(randomX, 0, randomZ),
+        [3] = Vector3.new(randomX, 9e99 randomZ),
         [4] = hitPos,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
@@ -968,14 +968,14 @@ end
         [9] = { [1] = false },
         [10] = {
             [1] = 9e99,
-            [2] = Vector3.new(0, 9e99, 0),
+            [2] = Vector3.new(9e99, 9e99, 9e99),
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
             [6] = 0.25
         },
         [11] = true,
-        [12] = false
+        [12] = true
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
