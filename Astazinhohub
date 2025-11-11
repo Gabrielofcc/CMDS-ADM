@@ -917,12 +917,18 @@ TabPlayers:AddToggle({
     end
 })
 
+local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
-    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local char = targetPlayer.Character
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char:FindFirstChild("Humanoid")
+    if not hrp or not humanoid then return end
 
-    -- pega a arma
+    -- pega a arma (mantive sua lógica)
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
         or (LocalPlayer.Character:FindFirstChild("Assault")
@@ -930,25 +936,74 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
+    -- random pra variabilidade do hit
     local randomX = math.random(-20000000, 20000000)
     local randomZ = math.random(-20000000, 20000000)
-    local randomY = math.random(-1, 1) * 0.001
-    local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
+    local randomY = math.random(-1, 1) * 0.01
+    local hitPos = hrp.Position + Vector3.new(9e99, randomY, 9e99)
 
-    -- 🔹 força o alvo a "andar" usando BodyVelocity com mais impacto
-if not hrp:FindFirstChild("AnnoyWalk") then
-    local bv = Instance.new("BodyVelocity")
-    bv.Name = "AnnoyWalk"
-    bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
-    bv.Velocity = hrp.CFrame.LookVector * 9e99   -- empurra 3x mais rápido
-    bv.Parent = hrp
-    game.Debris:AddItem(bv, 0.001)               -- dura mais tempo
-else
-    local bv = hrp:FindFirstChild("AnnoyWalk")
-    bv.Velocity = hrp.CFrame.LookVector * 9e99
-end
+    -- alvo: direção horizontal do empurrão (mantive sua intenção de LookVector)
+    local forward = hrp.CFrame.LookVector or Vector3.new(0, 0, -9e99)
+    local pushVelocity = forward * 20 -- velocidade horizontal (aumentei)
+    local downwardVelocity = Vector3.new(0, -9e99, 0) -- força pra baixo (derruba)
+    local finalVelocity = pushVelocity + downwardVelocity
 
-    -- executa o efeito de tiro (annoy)
+    -- aplicando BodyVelocity e BodyAngularVelocity para derrubar consistentemente
+    -- removemos/atualizamos anexo existente com nomes claros
+    local bv = hrp:FindFirstChild("AnnoyWalkBV")
+    if not bv then
+        bv = Instance.new("BodyVelocity")
+        bv.Name = "AnnoyWalkBV"
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- força bem alta para atravessar possíveis resistências
+        bv.Velocity = finalVelocity
+        bv.P = 9e99
+        bv.Parent = hrp
+        Debris:AddItem(bv, 0.25) -- dura um pouco mais para garantir o efeito
+    else
+        bv.Velocity = finalVelocity
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    end
+
+    -- adiciona rotação para bagunçar o jogador (ajuda a derrubar)
+    local bav = hrp:FindFirstChild("AnnoyWalkBAV")
+    if not bav then
+        bav = Instance.new("BodyAngularVelocity")
+        bav.Name = "AnnoyWalkBAV"
+        bav.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bav.AngularVelocity = Vector3.new(math.random(-8,8), math.random(-6,6), math.random(-8,8))
+        bav.Parent = hrp
+        Debris:AddItem(bav, 0.25)
+    else
+        bav.AngularVelocity = Vector3.new(math.random(-8,8), math.random(-6,6), math.random(-8,8))
+    end
+
+    -- força o Humanoid ao estado de queda/sem controle
+    -- usamos pcall para evitar erro se o humanoid for removido no meio
+    pcall(function()
+        -- seta PlatformStand para tirar controle do jogador
+        humanoid.PlatformStand = true
+
+        -- tenta forçar estado de queda (alguns jogos respondem a FallingDown)
+        if humanoid.ChangeState then
+            pcall(function()
+                humanoid:ChangeState(Enum.HumanoidStateType.FallingDown)
+            end)
+        end
+    end)
+
+    -- restaurar PlatformStand depois de curto período pra não travar permanentemente
+    coroutine.wrap(function()
+        wait(0.1) -- espera efeito principal
+        -- dá mais um tempo se player ainda no chão
+        wait(0.1)
+        pcall(function()
+            if humanoid and humanoid.Parent then
+                humanoid.PlatformStand = false
+            end
+        end)
+    end)()
+
+    -- executa o efeito de tiro (annoy) via evento (mantive do seu código)
     local args = {
         [1] = hrp,
         [2] = hrp,
@@ -973,7 +1028,9 @@ end
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
     if event then
-        event:FireServer(unpack(args))
+        pcall(function()
+            event:FireServer(unpack(args))
+        end)
     end
 end
 
