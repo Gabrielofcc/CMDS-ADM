@@ -1715,7 +1715,7 @@ TabPlayers:AddButton({
 
         -- BodyVelocity para VOAR até o alvo (não teleportar)
         local tet = Instance.new("BodyVelocity", seat1)  
-        tet.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- Força controlada para voo suave
+        tet.MaxForce = Vector3.new(40000, 40000, 40000) -- Força controlada para voo suave
         tet.P = 1000
         tet.Velocity = Vector3.new(0, 0, 0)  
         tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
@@ -1761,7 +1761,7 @@ TabPlayers:AddButton({
             seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
             seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
             couch.Parent = LocalPlayer.Character
-            task.wait(0.5)
+            task.wait(1)
             
             -- Larga o alvo no void
             couch.Parent = LocalPlayer.Backpack
