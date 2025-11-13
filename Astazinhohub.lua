@@ -1727,7 +1727,7 @@ TabPlayers:AddButton({
             if not tRoot then break end
             
             -- Posição exatamente no centro do alvo
-            local centerPos = tRoot.Position + Vector3.new(0, -1, 0) -- Centro do torso
+            local centerPos = tRoot.Position + Vector3.new(0, 1, 0) -- Centro do torso
             local predictedPos = centerPos + (tRoot.Velocity * 0.3) -- Previsão suave
             
             -- Calcula direção para voar até o alvo
