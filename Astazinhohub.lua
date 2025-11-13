@@ -1269,7 +1269,7 @@ local player = Players.LocalPlayer
     bv.Name = "FlingPower"  
     bv.Velocity = Vector3.new(9e9, 9e9, 9e9)  
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = 9e999
+    bv.P = 9e99  
     bv.Parent = Ball  
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
@@ -1300,6 +1300,35 @@ local player = Players.LocalPlayer
     end)  
 end
 
+})
+
+TabPlayers:AddButton({
+    Name = "Shrink Me",
+    Description = "Deixa seu personagem cada vez menor até 50% do tamanho normal",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid", 5)
+
+        if not humanoid then
+            warn("Humanoid não encontrado!")
+            return
+        end
+
+        -- Sequência de tamanhos conforme solicitado
+        local sizes = {1, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50}
+
+        for _, size in ipairs(sizes) do
+            if humanoid and humanoid.Parent and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+                humanoid:ScaleTo(size)
+                task.wait(0.2) -- meio segundo entre cada redução
+            else
+                break
+            end
+        end
+
+        print("Shrink completo! Tamanho final: 0.50x")
+    end
 })
 
 TabPlayers:AddToggle({
