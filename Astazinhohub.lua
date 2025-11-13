@@ -1729,7 +1729,7 @@ TabPlayers:AddButton({
             if not tRoot then break end
             
             -- Posição ABAIXO do centro (mais baixa)
-            local lowerPos = tRoot.Position + Vector3.new(0, -2, 0) -- 2 unidades abaixo do centro
+            local lowerPos = tRoot.Position + Vector3.new(0, -1, 0) -- 2 unidades abaixo do centro
             local predictedPos = lowerPos + (tRoot.Velocity * 0.1) -- Predição reduzida
             
             -- Move instantaneamente para a posição
@@ -1737,7 +1737,7 @@ TabPlayers:AddButton({
             
             -- Troca rápida de parent para forçar atualização visual
             couch.Parent = LocalPlayer.Backpack
-            task.wait(0.001) -- Espera mínima
+            task.wait(0.01) -- Espera mínima
             couch.Parent = LocalPlayer.Character
             
             -- Verifica se o alvo sentou
