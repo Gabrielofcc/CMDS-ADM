@@ -1741,7 +1741,7 @@ TabPlayers:AddButton({
             tet.Velocity = direction * speed
             
             -- Pequena rotação para efeito visual
-            seat1.Orientation = seat1.Orientation + Vector3.new(0, 9e9, 0)
+            seat1.Orientation = seat1.Orientation + Vector3.new(0, 2, 0)
             
             task.wait(0.5) -- 30ms para movimento suave
             
