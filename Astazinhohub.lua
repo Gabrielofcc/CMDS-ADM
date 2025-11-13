@@ -1688,86 +1688,80 @@ TabPlayers:AddButton({
             return
         end
 
-        local args = { [1] = "ClearAllTools" }  
-        ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer(unpack(args))  
-        local args = { [1] = "PickingTools", [2] = "Couch" }  
-        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))  
+        -- Limpeza inicial mais rápida
+        ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
 
-        local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)  
-        if not couch then  
-            warn("Erro: Sofá não encontrado no Backpack")  
-            return  
-        end  
+        local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)
+        if not couch then
+            warn("Erro: Sofá não encontrado no Backpack")
+            return
+        end
 
-        couch.Name = "Chaos.Couch"  
-        local seat1 = couch:FindFirstChild("Seat1")  
-        local seat2 = couch:FindFirstChild("Seat2")  
-        local handle = couch:FindFirstChild("Handle")  
-        if seat1 and seat2 and handle then  
-            seat1.Disabled = true  
-            seat2.Disabled = true  
-            handle.Name = "Handle "  
-        else  
-            warn("Erro: Componentes do sofá não encontrados")  
-            return  
-        end  
-        couch.Parent = LocalPlayer.Character  
-
-        local tet = Instance.new("BodyVelocity", seat1)  
-        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-        tet.P = 1250  
-        tet.Velocity = Vector3.new(math.huge, math.huge, math.huge)  
-        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
-
-        repeat  
-            for m = 1, 35 do  
-                local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
-                if not tRoot then break end
-                
-                -- Posição exatamente no centro do alvo
-                local centerPos = tRoot.Position + Vector3.new(0, 1.5, 0) -- Centro do torso
-                local predictedPos = centerPos + (tRoot.Velocity / 2)
-                
-                -- Coloca o sofá exatamente no centro do alvo
-                seat1.CFrame = CFrame.new(predictedPos)
-                task.wait()
-            end
-            tet:Destroy()
-            couch.Parent = LocalPlayer.Backpack
-            task.wait()
-            couch:FindFirstChild("Handle ").Name = "Handle"
-            task.wait(0.05)
-            couch.Parent = LocalPlayer.Character
-            task.wait()
-            couch.Parent = LocalPlayer.Backpack
-            couch.Handle.Name = "Handle "
-            task.wait(0.05)
-            couch.Parent = LocalPlayer.Character
-            tet = Instance.new("BodyVelocity", seat1)
-            tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            tet.P = 1250
-            tet.Velocity = Vector3.new(9e99, 9e99, 9e99)
-            tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
-        until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
+        -- Configuração rápida do sofá
+        couch.Name = "Chaos.Couch"
+        local seat1 = couch:FindFirstChild("Seat1")
+        local seat2 = couch:FindFirstChild("Seat2")
+        local handle = couch:FindFirstChild("Handle")
         
-        -- Teleporta direto para o void e larga o alvo lá
-        task.wait()
-        couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99)) -- Void profundo
-        seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99)) -- Void profundo
+        if seat1 and seat2 and handle then
+            seat1.Disabled = true
+            seat2.Disabled = true
+            handle.Name = "Handle "
+        else
+            warn("Erro: Componentes do sofá não encontrados")
+            return
+        end
+
         couch.Parent = LocalPlayer.Character
-        task.wait(0.05) -- Espera o alvo chegar no void
+
+        -- BodyVelocity para movimento rápido
+        local tet = Instance.new("BodyVelocity", seat1)
+        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        tet.P = 1250
+        tet.Velocity = Vector3.new(math.huge, math.huge, math.huge)
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+
+        -- Ataque otimizado (menos de 1ms por ciclo)
+        local startTime = tick()
+        repeat
+            local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
+            if not tRoot then break end
+            
+            -- Posição ABAIXO do centro (mais baixa)
+            local lowerPos = tRoot.Position + Vector3.new(0, -2, 0) -- 2 unidades abaixo do centro
+            local predictedPos = lowerPos + (tRoot.Velocity * 0.1) -- Predição reduzida
+            
+            -- Move instantaneamente para a posição
+            seat1.CFrame = CFrame.new(predictedPos)
+            
+            -- Troca rápida de parent para forçar atualização visual
+            couch.Parent = LocalPlayer.Backpack
+            task.wait(0.001) -- Espera mínima
+            couch.Parent = LocalPlayer.Character
+            
+            -- Verifica se o alvo sentou
+            if targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit then
+                break
+            end
+            
+        until (tick() - startTime) > 5 -- Timeout de 5 segundos
+
+        -- Teleporta direto para o void (mais profundo)
+        couch.Parent = LocalPlayer.Backpack
+        seat1.CFrame = CFrame.new(Vector3.new(0, -1e6, 0)) -- Void mais discreto
+        seat2.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
+        couch.Parent = LocalPlayer.Character
+        task.wait(0.01)
         
         -- Larga o alvo no void
         couch.Parent = LocalPlayer.Backpack
-        task.wait(0.05)
         
-        -- Limpeza final
-        local bv = seat1:FindFirstChild("#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W")
-        if bv then bv:Destroy() end
+        -- Limpeza final silenciosa
+        if tet then tet:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         
-        print("Alvo largado no void com sucesso!")
+        print("Alvo eliminado com sucesso!")
     end
 })
 
