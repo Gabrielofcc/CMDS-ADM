@@ -1716,7 +1716,7 @@ TabPlayers:AddButton({
         local tet = Instance.new("BodyVelocity", seat1)  
         tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
         tet.P = 1250  
-        tet.Velocity = Vector3.new(0, 0, 0)  
+        tet.Velocity = Vector3.new(math.huge, math.huge, math.huge)  
         tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
 
         repeat  
@@ -1736,31 +1736,31 @@ TabPlayers:AddButton({
             couch.Parent = LocalPlayer.Backpack
             task.wait()
             couch:FindFirstChild("Handle ").Name = "Handle"
-            task.wait(0.2)
+            task.wait(0.05)
             couch.Parent = LocalPlayer.Character
             task.wait()
             couch.Parent = LocalPlayer.Backpack
             couch.Handle.Name = "Handle "
-            task.wait(0.2)
+            task.wait(0.05)
             couch.Parent = LocalPlayer.Character
             tet = Instance.new("BodyVelocity", seat1)
             tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
             tet.P = 1250
-            tet.Velocity = Vector3.new(0, 0, 0)
+            tet.Velocity = Vector3.new(9e99, 9e99, 9e99)
             tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
         until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
         
         -- Teleporta direto para o void e larga o alvo lá
         task.wait()
         couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(0, -99999, 0)) -- Void profundo
-        seat2.CFrame = CFrame.new(Vector3.new(0, -99999, 0)) -- Void profundo
+        seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99)) -- Void profundo
+        seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99)) -- Void profundo
         couch.Parent = LocalPlayer.Character
-        task.wait(0.5) -- Espera o alvo chegar no void
+        task.wait(0.05) -- Espera o alvo chegar no void
         
         -- Larga o alvo no void
         couch.Parent = LocalPlayer.Backpack
-        task.wait(2)
+        task.wait(0.05)
         
         -- Limpeza final
         local bv = seat1:FindFirstChild("#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W")
