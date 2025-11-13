@@ -1671,7 +1671,7 @@ TabPlayers:AddButton({
 
 TabPlayers:AddButton({
     Name = "Kill with Couch",
-    Description = "Força o alvo a sentar no sofá e manda pro void",
+    Description = "Força o alvo a sentar no sofá e desce até o void",
     Callback = function()
         if not selectedPlayer then
             warn("Nenhum jogador selecionado!")
@@ -1723,58 +1723,67 @@ TabPlayers:AddButton({
         local radius = 2 -- Raio do giro em volta do alvo
         local heightOffset = 1 -- Altura do centro do corpo (meio do torso)
 
+        -- Fase 1: Girar em volta do alvo até ele sentar
         repeat  
-            for m = 1, 35 do  
-                local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
-                if not tRoot then break end
+            local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
+            local tHumanoid = targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid")
+            if not tRoot or not tHumanoid then break end
                 
-                -- Calcula a posição giratória em volta do alvo
-                angle = angle + 0.2 -- Velocidade do giro
-                if angle > math.pi * 2 then angle = 0 end
-                
-                local offsetX = math.cos(angle) * radius
-                local offsetZ = math.sin(angle) * radius
-                
-                -- Posição no centro do corpo do alvo (meio do torso)
-                local targetPos = tRoot.Position + Vector3.new(0, heightOffset, 0)
-                local predictedPos = targetPos + (tRoot.Velocity / 2)
-                
-                -- Aplica o giro em volta do alvo
-                local finalPos = predictedPos + Vector3.new(offsetX, 0, offsetZ)
-                
-                seat1.CFrame = CFrame.new(finalPos) * CFrame.Angles(0, angle, 0)
-                task.wait()
-            end
+            -- Calcula a posição giratória em volta do alvo
+            angle = angle + 0.1 -- Velocidade do giro mais lenta
+            if angle > math.pi * 2 then angle = 0 end
             
-            tet:Destroy()
-            couch.Parent = LocalPlayer.Backpack
+            local offsetX = math.cos(angle) * radius
+            local offsetZ = math.sin(angle) * radius
+            
+            -- Posição no centro do corpo do alvo
+            local targetPos = tRoot.Position + Vector3.new(0, heightOffset, 0)
+            local predictedPos = targetPos + (tRoot.Velocity * 0.3) -- Previsão melhorada
+            
+            -- Aplica o giro em volta do alvo
+            local finalPos = predictedPos + Vector3.new(offsetX, 0, offsetZ)
+            
+            -- Aplica rotação ao sofá para girar junto
+            seat1.CFrame = CFrame.new(finalPos) * CFrame.Angles(0, angle + math.pi, 0)
             task.wait()
-            couch:FindFirstChild("Handle ").Name = "Handle"
-            task.wait(0.2)
-            couch.Parent = LocalPlayer.Character
-            task.wait()
-            couch.Parent = LocalPlayer.Backpack
-            couch.Handle.Name = "Handle "
-            task.wait(0.2)
-            couch.Parent = LocalPlayer.Character
-            tet = Instance.new("BodyVelocity", seat1)
-            tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            tet.P = 1250
-            tet.Velocity = Vector3.new(0, 0, 0)
-            tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
         until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
         
+        -- Fase 2: Descer gradualmente até o void
+        if targetPlayer.Character and targetPlayer.Character.Humanoid then
+            local tHumanoid = targetPlayer.Character.Humanoid
+            local descentSpeed = 50 -- Velocidade de descida
+            local currentHeight = seat1.Position.Y
+            
+            while tHumanoid.Health > 0 and targetPlayer.Character do
+                currentHeight = currentHeight - descentSpeed * task.wait()
+                
+                -- Mantém a posição X e Z do alvo, só muda a altura
+                local tRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if tRoot then
+                    local currentPos = Vector3.new(tRoot.Position.X, currentHeight, tRoot.Position.Z)
+                    seat1.CFrame = CFrame.new(currentPos) * CFrame.Angles(0, angle, 0)
+                end
+                
+                -- Verifica se chegou no void (altura muito baixa)
+                if currentHeight < -500 then
+                    break
+                end
+            end
+        end
+        
+        -- Limpeza final
         task.wait()
         couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
-        seat2.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
-        couch.Parent = LocalPlayer.Character
-        task.wait(0.1)
-        couch.Parent = LocalPlayer.Backpack
-        task.wait(2)
         local bv = seat1:FindFirstChild("#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W")
         if bv then bv:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+        
+        -- Mensagem de conclusão
+        if targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Health <= 0 then
+            print("Alvo morto com sucesso!")
+        else
+            print("Processo de kill finalizado")
+        end
     end
 })
 
