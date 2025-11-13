@@ -1717,35 +1717,21 @@ TabPlayers:AddButton({
         tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
         tet.P = 1250  
         tet.Velocity = Vector3.new(0, 0, 0)  
-        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
-
-        local angle = 0
-        local radius = 1 -- Raio do giro em volta do alvo
-        local heightOffset = 0 -- Altura do centro do corpo (meio do torso)
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
 
         repeat  
             for m = 1, 35 do  
                 local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
                 if not tRoot then break end
                 
-                -- Calcula a posição giratória em volta do alvo
-                angle = angle + 0.2 -- Velocidade do giro
-                if angle > math.pi * 2 then angle = 0 end
+                -- Posição exatamente no centro do alvo
+                local centerPos = tRoot.Position + Vector3.new(0, 1.5, 0) -- Centro do torso
+                local predictedPos = centerPos + (tRoot.Velocity / 2)
                 
-                local offsetX = math.cos(angle) * radius
-                local offsetZ = math.sin(angle) * radius
-                
-                -- Posição no centro do corpo do alvo (meio do torso)
-                local targetPos = tRoot.Position + Vector3.new(0, heightOffset, 0)
-                local predictedPos = targetPos + (tRoot.Velocity / 2)
-                
-                -- Aplica o giro em volta do alvo
-                local finalPos = predictedPos + Vector3.new(offsetX, 0, offsetZ)
-                
-                seat1.CFrame = CFrame.new(finalPos) * CFrame.Angles(0, angle, 0)
+                -- Coloca o sofá exatamente no centro do alvo
+                seat1.CFrame = CFrame.new(predictedPos)
                 task.wait()
             end
-            
             tet:Destroy()
             couch.Parent = LocalPlayer.Backpack
             task.wait()
@@ -1764,17 +1750,24 @@ TabPlayers:AddButton({
             tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
         until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
         
+        -- Teleporta direto para o void e larga o alvo lá
         task.wait()
         couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
-        seat2.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
+        seat1.CFrame = CFrame.new(Vector3.new(0, -99999, 0)) -- Void profundo
+        seat2.CFrame = CFrame.new(Vector3.new(0, -99999, 0)) -- Void profundo
         couch.Parent = LocalPlayer.Character
-        task.wait(0.1)
+        task.wait(0.5) -- Espera o alvo chegar no void
+        
+        -- Larga o alvo no void
         couch.Parent = LocalPlayer.Backpack
         task.wait(2)
+        
+        -- Limpeza final
         local bv = seat1:FindFirstChild("#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W")
         if bv then bv:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+        
+        print("Alvo largado no void com sucesso!")
     end
 })
 
