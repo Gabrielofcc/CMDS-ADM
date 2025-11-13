@@ -1269,7 +1269,7 @@ local player = Players.LocalPlayer
     bv.Name = "FlingPower"  
     bv.Velocity = Vector3.new(9e9, 9e9, 9e9)  
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = 9e99  
+    bv.P = 9e999
     bv.Parent = Ball  
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
@@ -1286,7 +1286,7 @@ local player = Players.LocalPlayer
             local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
             -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.8)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.75)  
 
             -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
             local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
@@ -1715,7 +1715,7 @@ TabPlayers:AddButton({
 
         -- BodyVelocity para VOAR até o alvo (não teleportar)
         local tet = Instance.new("BodyVelocity", seat1)  
-        tet.MaxForce = Vector3.new(40000, 40000, 40000) -- Força controlada para voo suave
+        tet.MaxForce = Vector3.new(99999, 99999, 99999) -- Força controlada para voo suave
         tet.P = 1000
         tet.Velocity = Vector3.new(0, 0, 0)  
         tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
