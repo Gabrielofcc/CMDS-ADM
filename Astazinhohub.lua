@@ -850,7 +850,7 @@ end
 criarToggle("Glitch Player (FE)", 0.05)
 criarToggle("Lag Player (FE)", 1)
 
--- Função que executa o "Stuck Player"
+-- Função "Lag Player (FE)" - cria efeito de lag visual no alvo
 local function stuckPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -863,31 +863,43 @@ local function stuckPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    local args = {
-        [1] = hrp,
-        [2] = hrp,
-        [3] = Vector3.new(0, -50000, 0), -- Força para BAIXO (valor mais realista)
-        [4] = hrp.Position, -- Usa a posição atual do alvo
-        [5] = gunScript:FindFirstChild("MuzzleEffect"),
-        [6] = gunScript:FindFirstChild("HitEffect"),
-        [7] = 0,
-        [8] = 0,
-        [9] = { [1] = false },
-        [10] = {
-            [1] = 25,
-            [2] = Vector3.new(100, 100, 100),
-            [3] = BrickColor.new(29),
-            [4] = 0.25,
-            [5] = Enum.Material.SmoothPlastic,
-            [6] = 0.25
-        },
-        [11] = true,
-        [12] = false
-    }
-
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
-    if event then
+    if not event then return end
+
+    -- parâmetros para o "lag visual"
+    local spamCount = 9999999         -- quantas vezes vai disparar seguidamente
+    local spamDelay = 0.01       -- intervalo entre cada envio (menor = mais lag)
+    local forcePower =  Vector3.new(0, -15000, 0)  -- força suave para baixo (mantém preso)
+    
+    for i = 1, spamCount do
+        local args = {
+            [1] = hrp,
+            [2] = hrp,
+            [3] = forcePower + Vector3.new(
+                math.random(-500, 500),
+                math.random(-300, 300),
+                math.random(-500, 500)
+            ), -- força variável para gerar o "tremor"
+            [4] = hrp.Position,
+            [5] = gunScript:FindFirstChild("MuzzleEffect"),
+            [6] = gunScript:FindFirstChild("HitEffect"),
+            [7] = 0,
+            [8] = 0,
+            [9] = { [1] = false },
+            [10] = {
+                [1] = 10,  
+                [2] = Vector3.new(50, 50, 50),
+                [3] = BrickColor.new("Really black"),
+                [4] = 0.2,
+                [5] = Enum.Material.SmoothPlastic,
+                [6] = 0.2
+            },
+            [11] = true,
+            [12] = false
+        }
+
         event:FireServer(unpack(args))
+        task.wait(spamDelay)
     end
 end
 
@@ -917,13 +929,12 @@ TabPlayers:AddToggle({
     end
 })
 
--- Função principal de "Annoy Player [BETA]"
 local function annoyPlayer(targetPlayer)
     if not targetPlayer or not targetPlayer.Character then return end
     local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    -- pega a arma (Assault) e o script de disparo
+    -- pega a arma
     local gunScript = LocalPlayer.Backpack:FindFirstChild("Assault")
         and LocalPlayer.Backpack.Assault:FindFirstChild("GunScript_Local")
         or (LocalPlayer.Character:FindFirstChild("Assault")
@@ -931,34 +942,45 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- posições aleatórias X e Z (grandes pra "confundir" servidor)
     local randomX = math.random(-20000000, 20000000)
     local randomZ = math.random(-20000000, 20000000)
-
-    -- micro variação no Y pra simular movimento (funciona mesmo parado)
-    local randomY = math.random(-1, 1) * 0.05
+    local randomY = math.random(-1, 1) * 0.01
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
+    -- 🔹 força o alvo a "andar" usando BodyVelocity com mais impacto
+if not hrp:FindFirstChild("AnnoyWalk") then
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "AnnoyWalk"
+    bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
+    bv.Velocity = hrp.CFrame.LookVector * 12   -- empurra 3x mais rápido
+    bv.Parent = hrp
+    game.Debris:AddItem(bv, 0.1)               -- dura mais tempo
+else
+    local bv = hrp:FindFirstChild("AnnoyWalk")
+    bv.Velocity = hrp.CFrame.LookVector * 12
+end
+
+    -- executa o efeito de tiro (annoy)
     local args = {
         [1] = hrp,
         [2] = hrp,
         [3] = Vector3.new(randomX, 0, randomZ),
-        [4] = hitPos, -- posição com leve variação
+        [4] = hitPos,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 9e9,
-            [2] = Vector3.new(0, 100, 0),
+            [1] = 9e99,
+            [2] = Vector3.new(0, 9e99, 0),
             [3] = BrickColor.new(29),
             [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
             [6] = 0.25
         },
         [11] = true,
-        [12] = false
+        [12] = true
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
@@ -967,11 +989,10 @@ local function annoyPlayer(targetPlayer)
     end
 end
 
-
--- Toggle principal
+-- toggle principal
 TabPlayers:AddToggle({
     Name = "Annoy Player [BETA]",
-    Description = "quando o alvo andar F pra ele ! [isto e infinito, ant supera]",
+    Description = "Mantém o alvo se mexendo e levando annoy constantemente",
     Default = false,
     Callback = function(state)
         if state then
@@ -985,7 +1006,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.1) -- intervalo entre execuções
+                    task.wait(0.15)
                 end
             end)
         else
@@ -1194,90 +1215,91 @@ TabPlayers:AddToggle({
 TabPlayers:AddSection({Name = "functions Target- "})
 
 TabPlayers:AddButton({
-    Name = "Fling Ball  ",
-    Description = "fling com bola op mais si tiver com ant n e boa",
-    Callback = function()
-        local Players = game:GetService("Players")
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local Workspace = game:GetService("Workspace")
-        local RunService = game:GetService("RunService")
+Name = "Fling Ball  ",
+Description = "fling com bola op mais si tiver com ant n e boa",
+Callback = function()
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
-        local player = Players.LocalPlayer
-        local targetPlayer = Players:FindFirstChild(selectedPlayer)
-        print("FOUND your USER:", selectedPlayer)
+local player = Players.LocalPlayer  
+    local targetPlayer = Players:FindFirstChild(selectedPlayer)  
+    print("FOUND your USER:", selectedPlayer)  
 
-        if not targetPlayer or not targetPlayer.Character then
-            warn("Jogador alvo inválido.")
-            return
-        end
+    if not targetPlayer or not targetPlayer.Character then  
+        warn("Jogador alvo inválido.")  
+        return  
+    end  
 
-        local character = player.Character or player.CharacterAdded:Wait()
-        local backpack = player:WaitForChild("Backpack")
-        local ServerBalls = Workspace:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")
+    local character = player.Character or player.CharacterAdded:Wait()  
+    local backpack = player:WaitForChild("Backpack")  
+    local ServerBalls = Workspace:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")  
 
-        -- Solicita e equipa a bola
-        if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then
-            ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
-        end
+    -- Solicita e equipa a bola  
+    if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then  
+        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")  
+    end  
 
-        repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")
+    repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")  
 
-        local ballTool = backpack:FindFirstChild("SoccerBall")
-        if ballTool then
-            ballTool.Parent = character
-        end
+    local ballTool = backpack:FindFirstChild("SoccerBall")  
+    if ballTool then  
+        ballTool.Parent = character  
+    end  
 
-        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
-        local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name)
+    repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)  
+    local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name)  
 
-        Ball.CanCollide = false
-        Ball.Massless = true
-        Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
+    Ball.CanCollide = false  
+    Ball.Massless = true  
+    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)  
 
-        -- Aplicar o fling
-        local tchar = targetPlayer.Character
-        local troot = tchar and tchar:FindFirstChild("HumanoidRootPart")
-        local thum = tchar and tchar:FindFirstChild("Humanoid")
-        if not troot or not thum then return end
+    -- Aplicar o fling  
+    local tchar = targetPlayer.Character  
+    local troot = tchar and tchar:FindFirstChild("HumanoidRootPart")  
+    local thum = tchar and tchar:FindFirstChild("Humanoid")  
+    if not troot or not thum then return end  
 
-        if Ball:FindFirstChildWhichIsA("BodyVelocity") then
-            Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
-        end
+    if Ball:FindFirstChildWhichIsA("BodyVelocity") then  
+        Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
+    end  
 
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "FlingPower"
-        bv.Velocity = Vector3.new(math.huge, math.huge, math.huge)
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.P = 9e99
-        bv.Parent = Ball
+    local bv = Instance.new("BodyVelocity")  
+    bv.Name = "FlingPower"  
+    bv.Velocity = Vector3.new(9e9, 9e9, 9e9)  
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
+    bv.P = 9e99  
+    bv.Parent = Ball  
 
-        -- Variáveis para movimento vertical (em vez de frente/trás)
-        local oscillationTime = 0
-        local oscillationSpeed = math.huge          -- velocidade da subida/descida
-        local oscillationDistance = 100       -- altura máxima da oscilação
-        local baseOffsetY = 0               -- posição base (baixo do pé)
+    -- Variáveis para movimento vertical (em vez de frente/trás)  
+    local oscillationTime = 0  
+    local oscillationSpeed = 9e99          -- velocidade da subida/descida  
+    local oscillationDistance = 40       -- altura máxima da oscilação  
+    local baseOffsetY = 0               -- posição base (baixo do pé)  
 
-        task.spawn(function()
-            repeat
-                oscillationTime += RunService.Heartbeat:Wait()
+    task.spawn(function()  
+        repeat  
+            oscillationTime += RunService.Heartbeat:Wait()  
 
-                -- movimento de subida e descida (seno)
-                local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
+            -- movimento de subida e descida (seno)  
+            local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
-                -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)
-                local predictedPos = troot.Position + (troot.Velocity * 0.8)
+            -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.8)  
 
-                -- posição final fica embaixo do alvo, oscilando pra cima/baixo
-                local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)
-                Ball.CFrame = CFrame.new(basePos)
+            -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
+            local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
+            Ball.CFrame = CFrame.new(basePos)  
 
-                -- rotação rápida invisível
-                Ball.Orientation += Vector3.new(360, 360, 360)
+            -- rotação rápida invisível  
+            Ball.Orientation += Vector3.new(360, 360, 360)  
 
-                task.wait(1/6000)
-            until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
-        end)
-    end
+            task.wait(1/6000)  
+        until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players  
+    end)  
+end
+
 })
 
 TabPlayers:AddToggle({
@@ -1644,6 +1666,99 @@ TabPlayers:AddButton({
                 
             end
         end
+    end
+})
+
+TabPlayers:AddButton({
+    Name = "Kill with Couch",
+    Description = "Força o alvo a sentar no sofá e manda pro void",
+    Callback = function()
+        if not selectedPlayer then
+            warn("Nenhum jogador selecionado!")
+            return
+        end
+
+        local targetPlayer = Players:FindFirstChild(selectedPlayer)
+        if not targetPlayer then
+            warn("Erro: Jogador alvo não encontrado")
+            return
+        end
+        if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            warn("Erro: Jogador alvo sem personagem ou HumanoidRootPart")
+            return
+        end
+
+        local args = { [1] = "ClearAllTools" }  
+        ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer(unpack(args))  
+        local args = { [1] = "PickingTools", [2] = "Couch" }  
+        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))  
+
+        local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)  
+        if not couch then  
+            warn("Erro: Sofá não encontrado no Backpack")  
+            return  
+        end  
+
+        couch.Name = "Chaos.Couch"  
+        local seat1 = couch:FindFirstChild("Seat1")  
+        local seat2 = couch:FindFirstChild("Seat2")  
+        local handle = couch:FindFirstChild("Handle")  
+        if seat1 and seat2 and handle then  
+            seat1.Disabled = true  
+            seat2.Disabled = true  
+            handle.Name = "Handle "  
+        else  
+            warn("Erro: Componentes do sofá não encontrados")  
+            return  
+        end  
+        couch.Parent = LocalPlayer.Character  
+
+        local tet = Instance.new("BodyVelocity", seat1)  
+        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
+        tet.P = 1250  
+        tet.Velocity = Vector3.new(0, 0, 0)  
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
+
+        repeat  
+            for m = 1, 35 do  
+                local pos = { x = 0, y = 0, z = 0 }
+                local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
+                if not tRoot then break end
+                pos.x = tRoot.Position.X + (tRoot.Velocity.X / 2)
+                pos.y = tRoot.Position.Y + (tRoot.Velocity.Y / 2)
+                pos.z = tRoot.Position.Z + (tRoot.Velocity.Z / 2)
+                seat1.CFrame = CFrame.new(Vector3.new(pos.x, pos.y, pos.z)) * CFrame.new(-2, 2, 0)
+                task.wait()
+            end
+            tet:Destroy()
+            couch.Parent = LocalPlayer.Backpack
+            task.wait()
+            couch:FindFirstChild("Handle ").Name = "Handle"
+            task.wait(0.2)
+            couch.Parent = LocalPlayer.Character
+            task.wait()
+            couch.Parent = LocalPlayer.Backpack
+            couch.Handle.Name = "Handle "
+            task.wait(0.2)
+            couch.Parent = LocalPlayer.Character
+            tet = Instance.new("BodyVelocity", seat1)
+            tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            tet.P = 1250
+            tet.Velocity = Vector3.new(0, 0, 0)
+            tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+        until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
+        
+        task.wait()
+        couch.Parent = LocalPlayer.Backpack
+        seat1.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
+        seat2.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
+        couch.Parent = LocalPlayer.Character
+        task.wait(0.1)
+        couch.Parent = LocalPlayer.Backpack
+        task.wait(2)
+        local bv = seat1:FindFirstChild("#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W")
+        if bv then bv:Destroy() end
+        ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
     end
 })
 
@@ -2021,122 +2136,6 @@ TabPlayers:AddToggle({
                     task.wait(0.1) -- Aumentei o wait para 0.1s para não travar muito
                 end
             end)
-        end
-    end
-})
-
-TabPlayers:AddButton({
-    Name = "Click fling croch",
-    Callback = function()
-        if not selectedPlayerName then
-            warn("Erro: Nenhum jogador selecionado")
-            return
-        end
-
-        local targetPlayer = jogadores:FindFirstChild(selectedPlayerName)
-        if not targetPlayer then
-            warn("Erro: Jogador alvo não encontrado")
-            return
-        end
-        if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            warn("Erro: Jogador alvo sem personagem ou HumanoidRootPart")
-            return
-        end
-
-        -- Limpar ferramentas e pegar o sofá
-        local args = { [1] = "ClearAllTools" }
-        rep.RE["1Clea1rTool1s"]:FireServer(unpack(args))
-        local args = { [1] = "PickingTools", [2] = "Couch" }
-        rep.RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
-
-        local couch = eu.Backpack:WaitForChild("Couch", 2)
-        if not couch then
-            warn("Erro: Sofá não encontrado no Backpack")
-            return
-        end
-
-        -- Preparar o sofá
-        couch.Name = "Chaos.Couch"
-        local seat1 = couch:FindFirstChild("Seat1")
-        local seat2 = couch:FindFirstChild("Seat2")
-        local handle = couch:FindFirstChild("Handle")
-        if seat1 and seat2 and handle then
-            seat1.Disabled = true
-            seat2.Disabled = true
-            handle.Name = "Handle "
-        else
-            warn("Erro: Componentes do sofá não encontrados")
-            return
-        end
-        couch.Parent = eu.Character
-
-        -- Criar movimento para o sofá
-        local tet = Instance.new("BodyVelocity", seat1)
-        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        tet.P = 1250
-        tet.Velocity = Vector3.new(0, 0, 0)
-        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
-
-        -- Fazer o sofá perseguir o alvo
-        repeat
-            for m = 1, 35 do
-                local tRoot = targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not tRoot then break end
-                local pos = tRoot.Position + (tRoot.Velocity / 2)
-                seat1.CFrame = CFrame.new(pos) * CFrame.new(-2, 2, 0)
-                task.wait()
-            end
-            
-            -- Resetar o sofá para evitar bugs
-            tet:Destroy()
-            couch.Parent = eu.Backpack
-            task.wait()
-            couch:FindFirstChild("Handle ").Name = "Handle"
-            task.wait(0.2)
-            couch.Parent = eu.Character
-            task.wait()
-            couch.Parent = eu.Backpack
-            couch.Handle.Name = "Handle "
-            task.wait(0.2)
-            couch.Parent = eu.Character
-            
-            -- Recriar o movimento
-            tet = Instance.new("BodyVelocity", seat1)
-            tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            tet.P = 1250
-            tet.Velocity = Vector3.new(0, 0, 0)
-            tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
-            
-        until targetPlayer.Character and targetPlayer.Character:FindFirstChildOfClass("Humanoid") and targetPlayer.Character.Humanoid.Sit == true
-
-        -- Quando o alvo sentar, teleportar para a morte
-        task.wait()
-        tet:Destroy()
-        couch.Parent = eu.Backpack
-        task.wait()
-        couch:FindFirstChild("Handle ").Name = "Handle"
-        task.wait(0.3)
-        couch.Parent = eu.Character
-        task.wait(0.3)
-        couch.Grip = CFrame.new(Vector3.new(0, 0, 0))
-        task.wait(0.3)
-        
-        -- Teleportar para posição de kill
-        local killPos = CFrame.new(265.46, -450.83, -59.93)
-        if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            targetPlayer.Character.HumanoidRootPart.CFrame = killPos
-        end
-        if eu.Character and eu.Character:FindFirstChild("HumanoidRootPart") then
-            eu.Character.HumanoidRootPart.CFrame = killPos
-        end
-        
-        task.wait(0.5)
-        rep.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
-        
-        -- Voltar para posição original
-        task.wait(0.2)
-        if eu.Character and eu.Character:FindFirstChild("HumanoidRootPart") then
-            eu.Character.HumanoidRootPart.CFrame = CFrame.new(originalPos)
         end
     end
 })
