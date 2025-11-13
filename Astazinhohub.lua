@@ -1717,19 +1717,35 @@ TabPlayers:AddButton({
         tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
         tet.P = 1250  
         tet.Velocity = Vector3.new(0, 0, 0)  
-        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+
+        local angle = 0
+        local radius = 2 -- Raio do giro em volta do alvo
+        local heightOffset = 1 -- Altura do centro do corpo (meio do torso)
 
         repeat  
             for m = 1, 35 do  
-                local pos = { x = 0, y = 0, z = 0 }
                 local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
                 if not tRoot then break end
-                pos.x = tRoot.Position.X + (tRoot.Velocity.X / 2)
-                pos.y = tRoot.Position.Y + (tRoot.Velocity.Y / 2)
-                pos.z = tRoot.Position.Z + (tRoot.Velocity.Z / 2)
-                seat1.CFrame = CFrame.new(Vector3.new(pos.x, pos.y, pos.z)) * CFrame.new(-2, 2, 0)
+                
+                -- Calcula a posição giratória em volta do alvo
+                angle = angle + 0.2 -- Velocidade do giro
+                if angle > math.pi * 2 then angle = 0 end
+                
+                local offsetX = math.cos(angle) * radius
+                local offsetZ = math.sin(angle) * radius
+                
+                -- Posição no centro do corpo do alvo (meio do torso)
+                local targetPos = tRoot.Position + Vector3.new(0, heightOffset, 0)
+                local predictedPos = targetPos + (tRoot.Velocity / 2)
+                
+                -- Aplica o giro em volta do alvo
+                local finalPos = predictedPos + Vector3.new(offsetX, 0, offsetZ)
+                
+                seat1.CFrame = CFrame.new(finalPos) * CFrame.Angles(0, angle, 0)
                 task.wait()
             end
+            
             tet:Destroy()
             couch.Parent = LocalPlayer.Backpack
             task.wait()
