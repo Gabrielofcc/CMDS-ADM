@@ -1688,7 +1688,7 @@ TabPlayers:AddButton({
             return
         end
 
-        -- Limpeza inicial mais rápida
+        -- Limpeza inicial
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
 
@@ -1698,7 +1698,7 @@ TabPlayers:AddButton({
             return
         end
 
-        -- Configuração rápida do sofá
+        -- Configuração do sofá
         couch.Name = "Chaos.Couch"
         local seat1 = couch:FindFirstChild("Seat1")
         local seat2 = couch:FindFirstChild("Seat2")
@@ -1715,49 +1715,47 @@ TabPlayers:AddButton({
 
         couch.Parent = LocalPlayer.Character
 
-        -- BodyVelocity para movimento rápido
+        -- BodyVelocity para movimento
         local tet = Instance.new("BodyVelocity", seat1)
         tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         tet.P = 1250
-        tet.Velocity = Vector3.new(math.huge, math.huge, math.huge)
+        tet.Velocity = Vector3.new(0, 0, 0)
         tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
 
-        -- Ataque otimizado (menos de 1ms por ciclo)
+        -- Ataque mais lento e visível (40ms)
         local startTime = tick()
         repeat
             local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
             if not tRoot then break end
             
-            -- Posição ABAIXO do centro (mais baixa)
-            local lowerPos = tRoot.Position + Vector3.new(0, -1, 0) -- 2 unidades abaixo do centro
-            local predictedPos = lowerPos + (tRoot.Velocity * 0.1) -- Predição reduzida
+            -- Posição ABAIXO do centro
+            local lowerPos = tRoot.Position + Vector3.new(0, -1, 0) -- 1 unidade abaixo do centro
+            local predictedPos = lowerPos + (tRoot.Velocity * 0.2) -- Predição suave
             
-            -- Move instantaneamente para a posição
+            -- Move para a posição (mantém o sofá visível)
             seat1.CFrame = CFrame.new(predictedPos)
             
-            -- Troca rápida de parent para forçar atualização visual
-            couch.Parent = LocalPlayer.Backpack
-            task.wait(0.01) -- Espera mínima
-            couch.Parent = LocalPlayer.Character
+            -- Troca de parent com intervalo maior (40ms)
+            task.wait(0.04) -- 40ms de espera
             
             -- Verifica se o alvo sentou
             if targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit then
                 break
             end
             
-        until (tick() - startTime) > 5 -- Timeout de 5 segundos
+        until (tick() - startTime) > 10 -- Timeout de 10 segundos
 
-        -- Teleporta direto para o void (mais profundo)
+        -- Teleporta para o void
         couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(0, -1e6, 0)) -- Void mais discreto
+        seat1.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
         seat2.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
         couch.Parent = LocalPlayer.Character
-        task.wait(0.01)
+        task.wait(0.1) -- Espera um pouco no void
         
         -- Larga o alvo no void
         couch.Parent = LocalPlayer.Backpack
         
-        -- Limpeza final silenciosa
+        -- Limpeza final
         if tet then tet:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         
