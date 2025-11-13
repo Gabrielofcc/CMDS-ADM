@@ -1713,10 +1713,10 @@ TabPlayers:AddButton({
         end  
         couch.Parent = LocalPlayer.Character  
 
-        -- BodyVelocity para VOAR RÁPIDO até o alvo
+        -- BodyVelocity para VOAR até o alvo (não teleportar)
         local tet = Instance.new("BodyVelocity", seat1)  
-        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge) -- Força máxima
-        tet.P = 9e99
+        tet.MaxForce = Vector3.new(9e9, 9e9, 9e9) -- Força controlada para voo suave
+        tet.P = 1000
         tet.Velocity = Vector3.new(0, 0, 0)  
         tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
 
@@ -1727,72 +1727,51 @@ TabPlayers:AddButton({
             if not tRoot then break end
             
             -- Posição exatamente no centro do alvo
-            local centerPos = tRoot.Position + Vector3.new(0, 0, 0) -- Centro do torso
-            local predictedPos = centerPos + (tRoot.Velocity * 0.1) -- Previsão mínima
+            local centerPos = tRoot.Position + Vector3.new(0, -1, 0) -- Centro do torso
+            local predictedPos = centerPos + (tRoot.Velocity * 0.3) -- Previsão suave
             
-            -- Calcula direção para voar RÁPIDO até o alvo
+            -- Calcula direção para voar até o alvo
             local direction = (predictedPos - seat1.Position).Unit
             local distance = (predictedPos - seat1.Position).Magnitude
             
-            -- Velocidade MÁXIMA
-            local speed = 9e99 -- Velocidade quase instantânea
+            -- Velocidade baseada na distância (mais rápido quando longe, mais lento quando perto)
+            local speed = math.min(distance * 10, 100) -- Máximo de 100 studs/segundo
             
-            -- Define a velocidade para VOAR RÁPIDO até o alvo
+            -- Define a velocidade para VOAR até o alvo
             tet.Velocity = direction * speed
             
-            task.wait(0.01) -- Quase instantâneo
+            -- Pequena rotação para efeito visual
+            seat1.Orientation = seat1.Orientation + Vector3.new(0, 9e9, 0)
             
-            -- Verifica se chegou perto o suficiente
-            if distance < 5 then
-                -- Quando chegar perto, teleporta exatamente no alvo
+            task.wait(0.5) -- 30ms para movimento suave
+            
+            -- Verifica se chegou perto o suficiente (2 studs de distância)
+            if distance < 0 then
+                -- Quando chegar perto, força o alvo a sentar
                 seat1.CFrame = CFrame.new(predictedPos)
                 break
             end
             
-        until (tick() - startTime) > 2 -- Timeout de 2 segundos (bem rápido)
+        until (tick() - startTime) > 8 -- Timeout de 8 segundos
 
-        -- Força o alvo a sentar (método original rápido)
-        repeat  
-            for m = 1, 10 do  -- Menos repetições para ser mais rápido
-                local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
-                if not tRoot then break end
-                
-                local centerPos = tRoot.Position + Vector3.new(0, 1, 0)
-                local predictedPos = centerPos + (tRoot.Velocity * 0.1)
-                
-                seat1.CFrame = CFrame.new(predictedPos)
-                task.wait(0.01)
-            end
-            
-            -- Troca rápida de parent
+        -- Se o alvo sentou, teleporta para o void
+        if targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true then
+            -- Teleporta direto para o void
             couch.Parent = LocalPlayer.Backpack
-            task.wait(0.01)
-            couch:FindFirstChild("Handle ").Name = "Handle"
-            task.wait(0.01)
+            seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
+            seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
             couch.Parent = LocalPlayer.Character
-            task.wait(0.01)
-            couch.Parent = LocalPlayer.Backpack
-            couch.Handle.Name = "Handle "
-            task.wait(0.01)
-            couch.Parent = LocalPlayer.Character
+            task.wait(0.5)
             
-        until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
-
-        -- Teleporta RÁPIDO para o void
-        couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
-        seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
-        couch.Parent = LocalPlayer.Character
-        task.wait(0.05) -- Espera mínima no void
+            -- Larga o alvo no void
+            couch.Parent = LocalPlayer.Backpack
+        end
         
-        -- Larga o alvo no void RÁPIDO
-        couch.Parent = LocalPlayer.Backpack
-        
-        -- Limpeza final RÁPIDA
+        -- Limpeza final
         if tet then tet:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         
-        print("Alvo eliminado instantaneamente!")
+        print("Processo finalizado!")
     end
 })
 
