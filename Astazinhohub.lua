@@ -1679,121 +1679,99 @@ TabPlayers:AddButton({
         end
 
         local targetPlayer = Players:FindFirstChild(selectedPlayer)
-        if not targetPlayer or not targetPlayer.Character then
-            warn("Jogador alvo inválido.")
+        if not targetPlayer then
+            warn("Erro: Jogador alvo não encontrado")
+            return
+        end
+        if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            warn("Erro: Jogador alvo sem personagem ou HumanoidRootPart")
             return
         end
 
-        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        local backpack = LocalPlayer:WaitForChild("Backpack")
-        
-        -- Limpeza inicial
-        ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
-        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+        local args = { [1] = "ClearAllTools" }  
+        ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer(unpack(args))  
+        local args = { [1] = "PickingTools", [2] = "Couch" }  
+        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))  
 
-        local couch = backpack:WaitForChild("Couch", 2)
-        if not couch then
-            warn("Erro: Sofá não encontrado no Backpack")
-            return
-        end
+        local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)  
+        if not couch then  
+            warn("Erro: Sofá não encontrado no Backpack")  
+            return  
+        end  
 
-        -- Configuração do sofá
-        couch.Name = "Chaos.Couch"
-        local seat1 = couch:FindFirstChild("Seat1")
-        local seat2 = couch:FindFirstChild("Seat2")
-        local handle = couch:FindFirstChild("Handle")
-        
-        if seat1 and seat2 and handle then
-            seat1.Disabled = true
-            seat2.Disabled = true
-            handle.Name = "Handle "
-        else
-            warn("Erro: Componentes do sofá não encontrados")
-            return
-        end
+        couch.Name = "Chaos.Couch"  
+        local seat1 = couch:FindFirstChild("Seat1")  
+        local seat2 = couch:FindFirstChild("Seat2")  
+        local handle = couch:FindFirstChild("Handle")  
+        if seat1 and seat2 and handle then  
+            seat1.Disabled = true  
+            seat2.Disabled = true  
+            handle.Name = "Handle "  
+        else  
+            warn("Erro: Componentes do sofá não encontrados")  
+            return  
+        end  
+        couch.Parent = LocalPlayer.Character  
 
-        couch.Parent = character
-
-        -- Aplicar o movimento igual ao Fling Ball
-        local tchar = targetPlayer.Character
-        local troot = tchar and tchar:FindFirstChild("HumanoidRootPart")
-        local thum = tchar and tchar:FindFirstChild("Humanoid")
-        if not troot or not thum then return end
-
-        -- BodyVelocity para movimento rápido
-        if seat1:FindFirstChildWhichIsA("BodyVelocity") then
-            seat1:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
-        end
-
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "FlingPower"
-        bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.P = 9e99
-        bv.Parent = seat1
-
-        -- Variáveis para movimento oscilante igual ao Fling Ball
-        local oscillationTime = 0
-        local oscillationSpeed = 50  -- velocidade da oscilação ajustada para o sofá
-        local oscillationDistance = 3  -- altura da oscilação menor para o sofá
-        local baseOffsetY = -1  -- posição base (abaixo do alvo)
+        -- BodyVelocity para VOAR até o alvo (não teleportar)
+        local tet = Instance.new("BodyVelocity", seat1)  
+        tet.MaxForce = Vector3.new(40000, 40000, 40000) -- Força controlada para voo suave
+        tet.P = 1000
+        tet.Velocity = Vector3.new(0, 0, 0)  
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"  
 
         local startTime = tick()
-        
-        task.spawn(function()
-            repeat
-                oscillationTime += RunService.Heartbeat:Wait()
 
-                -- movimento de subida e descida (seno) igual ao Fling Ball
-                local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
-
-                -- PREVISÃO: calcula onde o alvo vai estar (mesmo método do Fling Ball)
-                local predictedPos = troot.Position + (troot.Velocity * 0.8)
-
-                -- posição final fica embaixo do alvo, oscilando pra cima/baixo
-                local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)
-                seat1.CFrame = CFrame.new(basePos)
-
-                -- rotação suave do sofá
-                seat1.Orientation = seat1.Orientation + Vector3.new(0, 5, 0)
-
-                task.wait(1/60)  -- mesma frequência do Fling Ball
-
-                -- Verifica se o alvo sentou
-                if thum.Sit == true then
-                    break
-                end
-
-            until thum.Sit == true or (tick() - startTime) > 10 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
-        end)
-
-        -- Espera o alvo sentar ou timeout
-        repeat
-            task.wait(0.1)
-        until thum.Sit == true or (tick() - startTime) > 10
+        repeat  
+            local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
+            if not tRoot then break end
+            
+            -- Posição exatamente no centro do alvo
+            local centerPos = tRoot.Position + Vector3.new(0, 1.5, 0) -- Centro do torso
+            local predictedPos = centerPos + (tRoot.Velocity * 0.3) -- Previsão suave
+            
+            -- Calcula direção para voar até o alvo
+            local direction = (predictedPos - seat1.Position).Unit
+            local distance = (predictedPos - seat1.Position).Magnitude
+            
+            -- Velocidade baseada na distância (mais rápido quando longe, mais lento quando perto)
+            local speed = math.min(distance * 10, 100) -- Máximo de 100 studs/segundo
+            
+            -- Define a velocidade para VOAR até o alvo
+            tet.Velocity = direction * speed
+            
+            -- Pequena rotação para efeito visual
+            seat1.Orientation = seat1.Orientation + Vector3.new(0, 2, 0)
+            
+            task.wait(0.03) -- 30ms para movimento suave
+            
+            -- Verifica se chegou perto o suficiente (2 studs de distância)
+            if distance < 2 then
+                -- Quando chegar perto, força o alvo a sentar
+                seat1.CFrame = CFrame.new(predictedPos)
+                break
+            end
+            
+        until (tick() - startTime) > 8 -- Timeout de 8 segundos
 
         -- Se o alvo sentou, teleporta para o void
-        if thum.Sit == true then
-            -- Teleporta para o void (mesmo método rápido)
-            couch.Parent = backpack
-            seat1.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
-            seat2.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
-            couch.Parent = character
-            task.wait(0.05)
+        if targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true then
+            -- Teleporta direto para o void
+            couch.Parent = LocalPlayer.Backpack
+            seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
+            seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
+            couch.Parent = LocalPlayer.Character
+            task.wait(0.1)
             
             -- Larga o alvo no void
-            couch.Parent = backpack
+            couch.Parent = LocalPlayer.Backpack
         end
-
+        
         -- Limpeza final
-        if bv then bv:Destroy() end
+        if tet then tet:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         
-        if thum.Sit == true then
-            print("Alvo eliminado com sucesso!")
-        else
-            print("Timeout - Alvo não sentou no sofá")
-        end
+        print("Processo finalizado!")
     end
 })
 
