@@ -1727,7 +1727,7 @@ TabPlayers:AddButton({
             if not tRoot then break end
             
             -- Posição exatamente no centro do alvo
-            local centerPos = tRoot.Position + Vector3.new(0, 1.5, 0) -- Centro do torso
+            local centerPos = tRoot.Position + Vector3.new(0, 1, 0) -- Centro do torso
             local predictedPos = centerPos + (tRoot.Velocity * 0.3) -- Previsão suave
             
             -- Calcula direção para voar até o alvo
@@ -1743,10 +1743,10 @@ TabPlayers:AddButton({
             -- Pequena rotação para efeito visual
             seat1.Orientation = seat1.Orientation + Vector3.new(0, 2, 0)
             
-            task.wait(0.03) -- 30ms para movimento suave
+            task.wait(0.5) -- 30ms para movimento suave
             
             -- Verifica se chegou perto o suficiente (2 studs de distância)
-            if distance < 2 then
+            if distance < 0 then
                 -- Quando chegar perto, força o alvo a sentar
                 seat1.CFrame = CFrame.new(predictedPos)
                 break
@@ -1761,7 +1761,7 @@ TabPlayers:AddButton({
             seat1.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
             seat2.CFrame = CFrame.new(Vector3.new(9e99, -9e99, 9e99))
             couch.Parent = LocalPlayer.Character
-            task.wait(0.1)
+            task.wait(1)
             
             -- Larga o alvo no void
             couch.Parent = LocalPlayer.Backpack
