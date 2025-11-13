@@ -1679,20 +1679,19 @@ TabPlayers:AddButton({
         end
 
         local targetPlayer = Players:FindFirstChild(selectedPlayer)
-        if not targetPlayer then
-            warn("Erro: Jogador alvo não encontrado")
-            return
-        end
-        if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            warn("Erro: Jogador alvo sem personagem ou HumanoidRootPart")
+        if not targetPlayer or not targetPlayer.Character then
+            warn("Jogador alvo inválido.")
             return
         end
 
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local backpack = LocalPlayer:WaitForChild("Backpack")
+        
         -- Limpeza inicial
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
 
-        local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)
+        local couch = backpack:WaitForChild("Couch", 2)
         if not couch then
             warn("Erro: Sofá não encontrado no Backpack")
             return
@@ -1713,53 +1712,88 @@ TabPlayers:AddButton({
             return
         end
 
-        couch.Parent = LocalPlayer.Character
+        couch.Parent = character
 
-        -- BodyVelocity para movimento
-        local tet = Instance.new("BodyVelocity", seat1)
-        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        tet.P = 1250
-        tet.Velocity = Vector3.new(0, 0, 0)
-        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+        -- Aplicar o movimento igual ao Fling Ball
+        local tchar = targetPlayer.Character
+        local troot = tchar and tchar:FindFirstChild("HumanoidRootPart")
+        local thum = tchar and tchar:FindFirstChild("Humanoid")
+        if not troot or not thum then return end
 
-        -- Ataque mais lento e visível (40ms)
+        -- BodyVelocity para movimento rápido
+        if seat1:FindFirstChildWhichIsA("BodyVelocity") then
+            seat1:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
+        end
+
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "FlingPower"
+        bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.P = 9e99
+        bv.Parent = seat1
+
+        -- Variáveis para movimento oscilante igual ao Fling Ball
+        local oscillationTime = 0
+        local oscillationSpeed = 50  -- velocidade da oscilação ajustada para o sofá
+        local oscillationDistance = 3  -- altura da oscilação menor para o sofá
+        local baseOffsetY = -1  -- posição base (abaixo do alvo)
+
         local startTime = tick()
-        repeat
-            local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
-            if not tRoot then break end
-            
-            -- Posição ABAIXO do centro
-            local lowerPos = tRoot.Position + Vector3.new(0, -1, 0) -- 1 unidade abaixo do centro
-            local predictedPos = lowerPos + (tRoot.Velocity * 0.2) -- Predição suave
-            
-            -- Move para a posição (mantém o sofá visível)
-            seat1.CFrame = CFrame.new(predictedPos)
-            
-            -- Troca de parent com intervalo maior (40ms)
-            task.wait(0.04) -- 40ms de espera
-            
-            -- Verifica se o alvo sentou
-            if targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit then
-                break
-            end
-            
-        until (tick() - startTime) > 10 -- Timeout de 10 segundos
+        
+        task.spawn(function()
+            repeat
+                oscillationTime += RunService.Heartbeat:Wait()
 
-        -- Teleporta para o void
-        couch.Parent = LocalPlayer.Backpack
-        seat1.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
-        seat2.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
-        couch.Parent = LocalPlayer.Character
-        task.wait(0.1) -- Espera um pouco no void
-        
-        -- Larga o alvo no void
-        couch.Parent = LocalPlayer.Backpack
-        
+                -- movimento de subida e descida (seno) igual ao Fling Ball
+                local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
+
+                -- PREVISÃO: calcula onde o alvo vai estar (mesmo método do Fling Ball)
+                local predictedPos = troot.Position + (troot.Velocity * 0.8)
+
+                -- posição final fica embaixo do alvo, oscilando pra cima/baixo
+                local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)
+                seat1.CFrame = CFrame.new(basePos)
+
+                -- rotação suave do sofá
+                seat1.Orientation = seat1.Orientation + Vector3.new(0, 5, 0)
+
+                task.wait(1/60)  -- mesma frequência do Fling Ball
+
+                -- Verifica se o alvo sentou
+                if thum.Sit == true then
+                    break
+                end
+
+            until thum.Sit == true or (tick() - startTime) > 10 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+        end)
+
+        -- Espera o alvo sentar ou timeout
+        repeat
+            task.wait(0.1)
+        until thum.Sit == true or (tick() - startTime) > 10
+
+        -- Se o alvo sentou, teleporta para o void
+        if thum.Sit == true then
+            -- Teleporta para o void (mesmo método rápido)
+            couch.Parent = backpack
+            seat1.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
+            seat2.CFrame = CFrame.new(Vector3.new(0, -1e6, 0))
+            couch.Parent = character
+            task.wait(0.05)
+            
+            -- Larga o alvo no void
+            couch.Parent = backpack
+        end
+
         -- Limpeza final
-        if tet then tet:Destroy() end
+        if bv then bv:Destroy() end
         ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
         
-        print("Alvo eliminado com sucesso!")
+        if thum.Sit == true then
+            print("Alvo eliminado com sucesso!")
+        else
+            print("Timeout - Alvo não sentou no sofá")
+        end
     end
 })
 
