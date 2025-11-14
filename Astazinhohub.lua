@@ -1274,9 +1274,9 @@ TabPlayers:AddButton({
 
         -- Variáveis para movimento esquerda/direita (relativo ao alvo)
         local oscillationTime = 0
-        local oscillationSpeed = 1          -- velocidade da oscilação (ajustado para visibilidade)
-        local oscillationDistance = 8        -- distância lateral máxima (em studs)
-        local baseOffsetY = 1                -- altura acima do chão (para não ficar dentro do chão)
+        local oscillationSpeed = 9e99         -- velocidade da oscilação (ajustado para visibilidade)
+        local oscillationDistance = 20        -- distância lateral máxima (em studs)
+        local baseOffsetY = 0            -- altura acima do chão (para não ficar dentro do chão)
 
         task.spawn(function()  
             repeat  
