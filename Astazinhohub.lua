@@ -942,44 +942,45 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    -- 🔁 Define uma distância curta e fixa do centro
-    local randomOffset = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)) * 1.5  -- 1.5 studs de distância
-    local hitPos = hrp.Position + randomOffset
+    local randomX = math.random(-20000000, 20000000)
+    local randomZ = math.random(-20000000, 20000000)
+    local randomY = math.random(-5, 5) * 0.01
+    local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
     -- 🔹 força o alvo a "andar" usando BodyVelocity com mais impacto
-    if not hrp:FindFirstChild("AnnoyWalk") then
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "AnnoyWalk"
-        bv.MaxForce = Vector3.new(9e99, 0, 9e99)
-        bv.Velocity = hrp.CFrame.LookVector * 15  -- velocidade maior para empurrar mais
-        bv.Parent = hrp
-        game.Debris:AddItem(bv, 0.05)  -- menor tempo, mas recicla mais rápido
-    else
-        local bv = hrp:FindFirstChild("AnnoyWalk")
-        bv.Velocity = hrp.CFrame.LookVector * 15
-    end
+if not hrp:FindFirstChild("AnnoyWalk") then
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "AnnoyWalk"
+    bv.MaxForce = Vector3.new(math.huge, 0, math.huge) -- força maior
+    bv.Velocity = hrp.CFrame.LookVector * 9e99   -- empurra 3x mais rápido
+    bv.Parent = hrp
+    game.Debris:AddItem(bv, 0.15)               -- dura mais tempo
+else
+    local bv = hrp:FindFirstChild("AnnoyWalk")
+    bv.Velocity = hrp.CFrame.LookVector * 9e99
+end
 
-    -- 🔥 Define o impacto do tiro com distância zero (colado)
+    -- executa o efeito de tiro (annoy)
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = hitPos,  -- posição colada no alvo
-        [4] = hitPos,  -- mesmo ponto de hit
+        [3] = Vector3.new(randomX, 0, randomZ),
+        [4] = hitPos,
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 9e99,  -- dano absurdo
-            [2] = Vector3.new(0, 9e99, 0),  -- knockback absurdo
+            [1] = 9e99,
+            [2] = Vector3.new(0, 9e99, 0),
             [3] = BrickColor.new(29),
-            [4] = 0.05,  -- duração do efeito menor
+            [4] = 0.25,
             [5] = Enum.Material.SmoothPlastic,
-            [6] = 0.05
+            [6] = 0.25
         },
         [11] = true,
-        [12] = true
+        [12] = false
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
@@ -1005,64 +1006,12 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.05) -- ataque mais rápido
+                    task.wait(0.15)
                 end
             end)
         else
             loopsAtivos["Annoy Player [BETA]"] = nil
             garantirArma(false)
-        end
-    end
-}) 
-
--- 🔒 função que trava o jogador e faz cair no chão
-local function freezePlayer(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character then return end
-    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    -- 🔹 aplica BodyVelocity para parar o movimento
-    if not hrp:FindFirstChild("FreezeBodyVelocity") then
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "FreezeBodyVelocity"
-        bv.MaxForce = Vector3.new(9e99, 9e99, 9e99)
-        bv.Velocity = Vector3.new(0, -50, 0) -- força para baixo
-        bv.Parent = hrp
-        game.Debris:AddItem(bv, 0.15)
-    end
-
-    -- 🔁 aplica BodyGyro para travar a rotação
-    if not hrp:FindFirstChild("FreezeBodyGyro") then
-        local bg = Instance.new("BodyGyro")
-        bg.Name = "FreezeBodyGyro"
-        bg.MaxTorque = Vector3.new(9e99, 9e99, 9e99)
-        bg.CFrame = hrp.CFrame * CFrame.Angles(math.rad(90), 0, 0) -- deita o corpo
-        bg.Parent = hrp
-        game.Debris:AddItem(bg, 0.15)
-    end
-end
-
--- toggle principal para travar o jogador
-TabPlayers:AddToggle({
-    Name = "Freeze Player [BETA]",
-    Description = "Deixa o alvo caído e duro no chão de forma engraçada",
-    Default = false,
-    Callback = function(state)
-        if state then
-            local loopId = {}
-            loopsAtivos["Freeze Player [BETA]"] = loopId
-
-            task.spawn(function()
-                while loopsAtivos["Freeze Player [BETA]"] == loopId do
-                    local targetPlayer = Players:FindFirstChild(selectedPlayer)
-                    if targetPlayer then
-                        freezePlayer(targetPlayer)
-                    end
-                    task.wait(0.1) -- aplica a cada 0.1s
-                end
-            end)
-        else
-            loopsAtivos["Freeze Player [BETA]"] = nil
         end
     end
 })
@@ -2142,8 +2091,8 @@ TabPlayers:AddButton({
 
         local SpinGyro = Instance.new("BodyGyro")    
         SpinGyro.Parent = PCar.PrimaryPart    
-        SpinGyro.MaxTorque = Vector3.new(9e99, 9e99, 9e99)    
-        SpinGyro.P = 9e99  
+        SpinGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)    
+        SpinGyro.P = 1e9  
         SpinGyro.CFrame = PCar.PrimaryPart.CFrame    
 
         workspace.Gravity = 0.1    
@@ -2169,13 +2118,13 @@ TabPlayers:AddButton({
             end
 
             -- teleporta até o alvo
-            PCar:SetPrimaryPartCFrame(CFrame.new(targetPos + Vector3.new(0, 1, 0)))
+            PCar:SetPrimaryPartCFrame(CFrame.new(targetPos + Vector3.new(0, 3, 0)))
             task.wait(0.05)
 
             -- aplica fling instantâneo
             local bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(9e99, 9e99, 9e99)
-            bodyVelocity.Velocity = Vector3.new(math.random(-9e99, 9e99), 9e99, math.random(-9e99, 9e99))
+            bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+            bodyVelocity.Velocity = Vector3.new(math.random(-1e4, 1e4), 1e5, math.random(-1e4, 1e4))
             bodyVelocity.Parent = TargetRP
             game.Debris:AddItem(bodyVelocity, 0.15)
 
