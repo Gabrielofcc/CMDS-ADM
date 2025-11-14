@@ -942,42 +942,41 @@ local function annoyPlayer(targetPlayer)
 
     if not gunScript then return end
 
-    local randomX = math.random(-20000000, 20000000)
-    local randomZ = math.random(-20000000, 20000000)
-    local randomY = math.random(-1, 1) * 0.01
-    local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
+    -- 🔁 Define uma distância curta e fixa do centro
+    local randomOffset = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)) * 1.5  -- 1.5 studs de distância
+    local hitPos = hrp.Position + randomOffset
 
     -- 🔹 força o alvo a "andar" usando BodyVelocity com mais impacto
-if not hrp:FindFirstChild("AnnoyWalk") then
-    local bv = Instance.new("BodyVelocity")
-    bv.Name = "AnnoyWalk"
-    bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
-    bv.Velocity = hrp.CFrame.LookVector * 12   -- empurra 3x mais rápido
-    bv.Parent = hrp
-    game.Debris:AddItem(bv, 0.1)               -- dura mais tempo
-else
-    local bv = hrp:FindFirstChild("AnnoyWalk")
-    bv.Velocity = hrp.CFrame.LookVector * 12
-end
+    if not hrp:FindFirstChild("AnnoyWalk") then
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "AnnoyWalk"
+        bv.MaxForce = Vector3.new(9e99, 0, 9e99)
+        bv.Velocity = hrp.CFrame.LookVector * 15  -- velocidade maior para empurrar mais
+        bv.Parent = hrp
+        game.Debris:AddItem(bv, 0.05)  -- menor tempo, mas recicla mais rápido
+    else
+        local bv = hrp:FindFirstChild("AnnoyWalk")
+        bv.Velocity = hrp.CFrame.LookVector * 15
+    end
 
-    -- executa o efeito de tiro (annoy)
+    -- 🔥 Define o impacto do tiro com distância zero (colado)
     local args = {
         [1] = hrp,
         [2] = hrp,
-        [3] = Vector3.new(randomX, 0, randomZ),
-        [4] = hitPos,
+        [3] = hitPos,  -- posição colada no alvo
+        [4] = hitPos,  -- mesmo ponto de hit
         [5] = gunScript:FindFirstChild("MuzzleEffect"),
         [6] = gunScript:FindFirstChild("HitEffect"),
         [7] = 0,
         [8] = 0,
         [9] = { [1] = false },
         [10] = {
-            [1] = 9e99,
-            [2] = Vector3.new(0, 9e99, 0),
+            [1] = 9e99,  -- dano absurdo
+            [2] = Vector3.new(0, 9e99, 0),  -- knockback absurdo
             [3] = BrickColor.new(29),
-            [4] = 0.25,
+            [4] = 0.05,  -- duração do efeito menor
             [5] = Enum.Material.SmoothPlastic,
-            [6] = 0.25
+            [6] = 0.05
         },
         [11] = true,
         [12] = true
@@ -1006,7 +1005,7 @@ TabPlayers:AddToggle({
                     if targetPlayer then
                         annoyPlayer(targetPlayer)
                     end
-                    task.wait(0.15)
+                    task.wait(0.05) -- ataque mais rápido
                 end
             end)
         else
