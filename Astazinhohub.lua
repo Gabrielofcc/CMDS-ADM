@@ -944,20 +944,20 @@ local function annoyPlayer(targetPlayer)
 
     local randomX = math.random(-20000000, 20000000)
     local randomZ = math.random(-20000000, 20000000)
-    local randomY = math.random(-5, 5) * 0.01
+    local randomY = math.random(-1, 1) * 0.01
     local hitPos = hrp.Position + Vector3.new(0, randomY, 0)
 
     -- 🔹 força o alvo a "andar" usando BodyVelocity com mais impacto
 if not hrp:FindFirstChild("AnnoyWalk") then
     local bv = Instance.new("BodyVelocity")
     bv.Name = "AnnoyWalk"
-    bv.MaxForce = Vector3.new(math.huge, 0, math.huge) -- força maior
-    bv.Velocity = hrp.CFrame.LookVector * 9e99   -- empurra 3x mais rápido
+    bv.MaxForce = Vector3.new(9e99, 0, 9e99) -- força maior
+    bv.Velocity = hrp.CFrame.LookVector * 12   -- empurra 3x mais rápido
     bv.Parent = hrp
-    game.Debris:AddItem(bv, 0.15)               -- dura mais tempo
+    game.Debris:AddItem(bv, 0.1)               -- dura mais tempo
 else
     local bv = hrp:FindFirstChild("AnnoyWalk")
-    bv.Velocity = hrp.CFrame.LookVector * 9e99
+    bv.Velocity = hrp.CFrame.LookVector * 12
 end
 
     -- executa o efeito de tiro (annoy)
@@ -980,7 +980,7 @@ end
             [6] = 0.25
         },
         [11] = true,
-        [12] = false
+        [12] = true
     }
 
     local event = ReplicatedStorage:FindFirstChild("RE") and ReplicatedStorage.RE:FindFirstChild("1Gu1n")
