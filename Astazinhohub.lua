@@ -1215,91 +1215,95 @@ TabPlayers:AddToggle({
 TabPlayers:AddSection({Name = "functions Target- "})
 
 TabPlayers:AddButton({
-Name = "Fling Ball  ",
-Description = "fling com bola op mais si tiver com ant n e boa",
-Callback = function()
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
+    Name = "Fling Ball  ",
+    Description = "fling com bola op mais si tiver com ant n e boa",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Workspace = game:GetService("Workspace")
+        local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer  
-    local targetPlayer = Players:FindFirstChild(selectedPlayer)  
-    print("FOUND your USER:", selectedPlayer)  
+        local player = Players.LocalPlayer  
+        local targetPlayer = Players:FindFirstChild(selectedPlayer)  
+        print("FOUND your USER:", selectedPlayer)  
 
-    if not targetPlayer or not targetPlayer.Character then  
-        warn("Jogador alvo inválido.")  
-        return  
-    end  
+        if not targetPlayer or not targetPlayer.Character then  
+            warn("Jogador alvo inválido.")  
+            return  
+        end  
 
-    local character = player.Character or player.CharacterAdded:Wait()  
-    local backpack = player:WaitForChild("Backpack")  
-    local ServerBalls = Workspace:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")  
+        local character = player.Character or player.CharacterAdded:Wait()  
+        local backpack = player:WaitForChild("Backpack")  
+        local ServerBalls = Workspace:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")  
 
-    -- Solicita e equipa a bola  
-    if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then  
-        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")  
-    end  
+        -- Solicita e equipa a bola  
+        if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then  
+            ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")  
+        end  
 
-    repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")  
+        repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")  
 
-    local ballTool = backpack:FindFirstChild("SoccerBall")  
-    if ballTool then  
-        ballTool.Parent = character  
-    end  
+        local ballTool = backpack:FindFirstChild("SoccerBall")  
+        if ballTool then  
+            ballTool.Parent = character  
+        end  
 
-    repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)  
-    local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name)  
+        repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)  
+        local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name)  
 
-    Ball.CanCollide = false  
-    Ball.Massless = true  
-    Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)  
+        Ball.CanCollide = false  
+        Ball.Massless = true  
+        Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)  
 
-    -- Aplicar o fling  
-    local tchar = targetPlayer.Character  
-    local troot = tchar and tchar:FindFirstChild("HumanoidRootPart")  
-    local thum = tchar and tchar:FindFirstChild("Humanoid")  
-    if not troot or not thum then return end  
+        -- Aplicar o fling  
+        local tchar = targetPlayer.Character  
+        local troot = tchar and tchar:FindFirstChild("HumanoidRootPart")  
+        local thum = tchar and tchar:FindFirstChild("Humanoid")  
+        if not troot or not thum then return end  
 
-    if Ball:FindFirstChildWhichIsA("BodyVelocity") then  
-        Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
-    end  
+        if Ball:FindFirstChildWhichIsA("BodyVelocity") then  
+            Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
+        end  
 
-    local bv = Instance.new("BodyVelocity")  
-    bv.Name = "FlingPower"  
-    bv.Velocity = Vector3.new(9e99, 9e99, 9e99)  
-    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = 9e99  
-    bv.Parent = Ball  
+        local bv = Instance.new("BodyVelocity")  
+        bv.Name = "FlingPower"  
+        bv.Velocity = Vector3.new(9e9, 9e9, 9e9)  
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
+        bv.P = 9e99  
+        bv.Parent = Ball  
 
-    -- Variáveis para movimento vertical (em vez de frente/trás)  
-    local oscillationTime = 0  
-    local oscillationSpeed = 9e99          -- velocidade da subida/descida  
-    local oscillationDistance = 20       -- altura máxima da oscilação  
-    local baseOffsetY = 0               -- posição base (baixo do pé)  
+        -- Variáveis para movimento esquerda/direita (relativo ao alvo)
+        local oscillationTime = 0
+        local oscillationSpeed = 1          -- velocidade da oscilação (ajustado para visibilidade)
+        local oscillationDistance = 8        -- distância lateral máxima (em studs)
+        local baseOffsetY = 3                -- altura acima do chão (para não ficar dentro do chão)
 
-    task.spawn(function()  
-        repeat  
-            oscillationTime += RunService.Heartbeat:Wait()  
+        task.spawn(function()  
+            repeat  
+                oscillationTime += RunService.Heartbeat:Wait()  
 
-            -- movimento de subida e descida (seno)  
-            local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
+                -- Movimento senoidal esquerda/direita usando o vetor lateral do alvo
+                local rightVector = troot.CFrame.RightVector.Unit
+                local offset = rightVector * math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
 
-            -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.75)  
+                -- Previsão da posição do alvo
+                local predictedPos = troot.Position + (troot.Velocity * 0.75)
 
-            -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
-            local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
-            Ball.CFrame = CFrame.new(basePos)  
+                -- Posição final: ao lado do alvo, com leve altura
+                local finalPos = predictedPos + Vector3.new(0, baseOffsetY, 0) + offset
+                Ball.CFrame = CFrame.new(finalPos)
 
-            -- rotação rápida invisível  
-            Ball.Orientation += Vector3.new(360, 360, 360)  
+                -- Rotação invisível (opcional, para evitar glitches visuais)
+                Ball.Orientation += Vector3.new(360, 360, 360)
 
-            task.wait(1/6000)  
-        until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players  
-    end)  
-end
-
+                task.wait()
+            until 
+                troot.Velocity.Magnitude > 100 or 
+                thum.Health <= 0 or 
+                not tchar:IsDescendantOf(Workspace) or 
+                targetPlayer.Parent ~= Players  
+        end)  
+    end
 })
 
 TabPlayers:AddButton({
