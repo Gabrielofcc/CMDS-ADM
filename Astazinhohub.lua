@@ -1276,7 +1276,7 @@ TabPlayers:AddButton({
         local oscillationTime = 0
         local oscillationSpeed = 1          -- velocidade da oscilação (ajustado para visibilidade)
         local oscillationDistance = 8        -- distância lateral máxima (em studs)
-        local baseOffsetY = 3                -- altura acima do chão (para não ficar dentro do chão)
+        local baseOffsetY = 1                -- altura acima do chão (para não ficar dentro do chão)
 
         task.spawn(function()  
             repeat  
