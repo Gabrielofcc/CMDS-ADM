@@ -2091,8 +2091,8 @@ TabPlayers:AddButton({
 
         local SpinGyro = Instance.new("BodyGyro")    
         SpinGyro.Parent = PCar.PrimaryPart    
-        SpinGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)    
-        SpinGyro.P = 1e9  
+        SpinGyro.MaxTorque = Vector3.new(9e99, 9e99, 9e99)    
+        SpinGyro.P = 9e99  
         SpinGyro.CFrame = PCar.PrimaryPart.CFrame    
 
         workspace.Gravity = 0.1    
@@ -2118,13 +2118,13 @@ TabPlayers:AddButton({
             end
 
             -- teleporta até o alvo
-            PCar:SetPrimaryPartCFrame(CFrame.new(targetPos + Vector3.new(0, 3, 0)))
+            PCar:SetPrimaryPartCFrame(CFrame.new(targetPos + Vector3.new(0, 1, 0)))
             task.wait(0.05)
 
             -- aplica fling instantâneo
             local bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-            bodyVelocity.Velocity = Vector3.new(math.random(-1e4, 1e4), 1e5, math.random(-1e4, 1e4))
+            bodyVelocity.MaxForce = Vector3.new(9e99, 9e99, 9e99)
+            bodyVelocity.Velocity = Vector3.new(math.random(-9e99, 9e99), 9e99, math.random(-9e99, 9e99))
             bodyVelocity.Parent = TargetRP
             game.Debris:AddItem(bodyVelocity, 0.15)
 
