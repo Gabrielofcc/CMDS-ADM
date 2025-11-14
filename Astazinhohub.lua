@@ -1274,8 +1274,8 @@ local player = Players.LocalPlayer
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
-    local oscillationSpeed = math.huge          -- velocidade da subida/descida  
-    local oscillationDistance = 20       -- altura máxima da oscilação  
+    local oscillationSpeed = 9e999          -- velocidade da subida/descida  
+    local oscillationDistance = 40       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
@@ -1286,7 +1286,7 @@ local player = Players.LocalPlayer
             local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
             -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.75)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.77)  
 
             -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
             local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
