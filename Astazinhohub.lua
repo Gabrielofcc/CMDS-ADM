@@ -1013,6 +1013,58 @@ TabPlayers:AddToggle({
             garantirArma(false)
         end
     end
+}) 
+
+-- 🔒 função que trava o jogador e faz cair no chão
+local function freezePlayer(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    local hrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- 🔹 aplica BodyVelocity para parar o movimento
+    if not hrp:FindFirstChild("FreezeBodyVelocity") then
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "FreezeBodyVelocity"
+        bv.MaxForce = Vector3.new(9e99, 9e99, 9e99)
+        bv.Velocity = Vector3.new(0, -50, 0) -- força para baixo
+        bv.Parent = hrp
+        game.Debris:AddItem(bv, 0.15)
+    end
+
+    -- 🔁 aplica BodyGyro para travar a rotação
+    if not hrp:FindFirstChild("FreezeBodyGyro") then
+        local bg = Instance.new("BodyGyro")
+        bg.Name = "FreezeBodyGyro"
+        bg.MaxTorque = Vector3.new(9e99, 9e99, 9e99)
+        bg.CFrame = hrp.CFrame * CFrame.Angles(math.rad(90), 0, 0) -- deita o corpo
+        bg.Parent = hrp
+        game.Debris:AddItem(bg, 0.15)
+    end
+end
+
+-- toggle principal para travar o jogador
+TabPlayers:AddToggle({
+    Name = "Freeze Player [BETA]",
+    Description = "Deixa o alvo caído e duro no chão de forma engraçada",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local loopId = {}
+            loopsAtivos["Freeze Player [BETA]"] = loopId
+
+            task.spawn(function()
+                while loopsAtivos["Freeze Player [BETA]"] == loopId do
+                    local targetPlayer = Players:FindFirstChild(selectedPlayer)
+                    if targetPlayer then
+                        freezePlayer(targetPlayer)
+                    end
+                    task.wait(0.1) -- aplica a cada 0.1s
+                end
+            end)
+        else
+            loopsAtivos["Freeze Player [BETA]"] = nil
+        end
+    end
 })
 
 TabPlayers:AddToggle({
