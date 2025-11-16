@@ -1267,15 +1267,15 @@ local player = Players.LocalPlayer
 
     local bv = Instance.new("BodyVelocity")  
     bv.Name = "FlingPower"  
-    bv.Velocity = Vector3.new(9e999, 9e999, 9e999)  
+    bv.Velocity = Vector3.new(-9e999, -9e999, -9e999)  
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = 9e999  
+    bv.P = -9e999  
     bv.Parent = Ball  
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
     local oscillationSpeed = 9e99          -- velocidade da subida/descida  
-    local oscillationDistance = 60       -- altura máxima da oscilação  
+    local oscillationDistance = 30       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
@@ -2578,7 +2578,7 @@ TabPlayers:AddToggle({
                         -- Config da oscilação vertical (mais forte e moderna)
                         local oscillationTime = 0
                         local oscillationSpeed = 9e99
-                        local oscillationDistance = 60
+                        local oscillationDistance = 30
                         local baseOffsetY = 0
 
                         -- Loop que cola a bola no alvo
