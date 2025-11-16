@@ -1274,7 +1274,7 @@ local player = Players.LocalPlayer
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
-    local oscillationSpeed = 9e999          -- velocidade da subida/descida  
+    local oscillationSpeed = 9e99          -- velocidade da subida/descida  
     local oscillationDistance = 60       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
@@ -2577,7 +2577,7 @@ TabPlayers:AddToggle({
 
                         -- Config da oscilação vertical (mais forte e moderna)
                         local oscillationTime = 0
-                        local oscillationSpeed = 9e999
+                        local oscillationSpeed = 9e99
                         local oscillationDistance = 60
                         local baseOffsetY = 0
 
