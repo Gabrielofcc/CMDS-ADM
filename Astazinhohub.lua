@@ -1283,8 +1283,8 @@ bv.Parent = Ball
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
-    local oscillationSpeed = 9e299          -- velocidade da subida/descida  
-    local oscillationDistance = 40       -- altura máxima da oscilação  
+    local oscillationSpeed = 9e499          -- velocidade da subida/descida  
+    local oscillationDistance = 2       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
@@ -1295,7 +1295,7 @@ bv.Parent = Ball
             local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
             -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.77)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.80)  
 
             -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
             local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
@@ -1305,7 +1305,7 @@ bv.Parent = Ball
             Ball.Orientation += Vector3.new(360, 360, 360)  
 
             task.wait(1/6000)  
-        until troot.Velocity.Magnitude > 100 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players  
+        until troot.Velocity.Magnitude > 25 or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players  
     end)  
 end
 
