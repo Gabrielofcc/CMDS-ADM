@@ -1262,15 +1262,24 @@ local player = Players.LocalPlayer
     if not troot or not thum then return end  
 
     if Ball:FindFirstChildWhichIsA("BodyVelocity") then  
-        Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
-    end  
+    Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
+end  
 
-    local bv = Instance.new("BodyVelocity")  
-    bv.Name = "FlingPower"  
-    bv.Velocity = Vector3.new(-9e999, -9e999, -9e999)  
-    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = -9e999  
-    bv.Parent = Ball  
+local bv = Instance.new("BodyVelocity")
+bv.Name = "FlingPower"
+
+-- DIREÇÃO ALEATÓRIA
+local dirs = {
+    troot.CFrame.LookVector * -50,   -- frente
+    troot.CFrame.LookVector * 50,    -- trás
+    troot.CFrame.RightVector * 50,   -- direita
+    troot.CFrame.RightVector * -50,  -- esquerda
+}
+
+bv.Velocity = dirs[math.random(1, #dirs)]
+bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+bv.P = 100
+bv.Parent = Ball
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
