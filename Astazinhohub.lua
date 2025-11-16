@@ -1267,14 +1267,14 @@ local player = Players.LocalPlayer
 
     local bv = Instance.new("BodyVelocity")  
     bv.Name = "FlingPower"  
-    bv.Velocity = Vector3.new(9e499, 9e499, 9e499)  
+    bv.Velocity = Vector3.new(9e99, 9e99, 9e99)  
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = 9e499  
+    bv.P = 9e99  
     bv.Parent = Ball  
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
-    local oscillationSpeed = 9e499          -- velocidade da subida/descida  
+    local oscillationSpeed = 9e99          -- velocidade da subida/descida  
     local oscillationDistance = 80       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
