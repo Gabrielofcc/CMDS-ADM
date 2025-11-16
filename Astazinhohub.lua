@@ -1278,13 +1278,13 @@ local dirs = {
 
 bv.Velocity = dirs[math.random(1, #dirs)]
 bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-bv.P = 500
+bv.P = 9e99
 bv.Parent = Ball
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
     local oscillationSpeed = 9e499          -- velocidade da subida/descida  
-    local oscillationDistance = 2       -- altura máxima da oscilação  
+    local oscillationDistance = -8       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
