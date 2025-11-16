@@ -1267,7 +1267,7 @@ local player = Players.LocalPlayer
 
     local bv = Instance.new("BodyVelocity")  
     bv.Name = "FlingPower"  
-    bv.Velocity = Vector3.new(9e99, 9e99, 9e99)  
+    bv.Velocity = Vector3.new(9e9, 9e9, 9e9)  
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
     bv.P = 9e99  
     bv.Parent = Ball  
@@ -1286,7 +1286,7 @@ local player = Players.LocalPlayer
             local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
             -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.80)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.77)  
 
             -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
             local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
@@ -2570,7 +2570,7 @@ TabPlayers:AddToggle({
                         -- Cria novo BV
                         local bv = Instance.new("BodyVelocity")
                         bv.Name = "FlingPower"
-                        bv.Velocity = Vector3.new(9e99, 9e99, 9e99)
+                        bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
                         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                         bv.P = 9e99
                         bv.Parent = Ball
@@ -2589,7 +2589,7 @@ TabPlayers:AddToggle({
                                 local osc = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
 
                                 -- Previsão de movimento
-                                local predictedPos = troot.Position + (troot.Velocity * 0.30)
+                                local predictedPos = troot.Position + (troot.Velocity * 0.77)
 
                                 -- Posição final
                                 local finalPos = predictedPos + Vector3.new(0, baseOffsetY + osc, 0)
