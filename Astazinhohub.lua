@@ -1262,24 +1262,15 @@ local player = Players.LocalPlayer
     if not troot or not thum then return end  
 
     if Ball:FindFirstChildWhichIsA("BodyVelocity") then  
-    Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
-end  
+        Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()  
+    end  
 
-local bv = Instance.new("BodyVelocity")
-bv.Name = "FlingPower"
-
--- DIREÇÃO ALEATÓRIA
-local dirs = {
-    troot.CFrame.LookVector * -9e99,   -- frente
-    troot.CFrame.LookVector * 9e99,    -- trás
-    troot.CFrame.RightVector * 9e99,   -- direita
-    troot.CFrame.RightVector * -9e99,  -- esquerda
-}
-
-bv.Velocity = dirs[math.random(1, #dirs)]
-bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-bv.P = 9e99
-bv.Parent = Ball
+    local bv = Instance.new("BodyVelocity")  
+    bv.Name = "FlingPower"  
+    bv.Velocity = Vector3.new(9e99, 9e99, 9e99)  
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
+    bv.P = 9e99  
+    bv.Parent = Ball  
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
@@ -1295,7 +1286,7 @@ bv.Parent = Ball
             local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
             -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.77)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.80)  
 
             -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
             local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
@@ -2579,9 +2570,9 @@ TabPlayers:AddToggle({
                         -- Cria novo BV
                         local bv = Instance.new("BodyVelocity")
                         bv.Name = "FlingPower"
-                        bv.Velocity = Vector3.new(9e999, 9e999, 9e999)
+                        bv.Velocity = Vector3.new(9e99, 9e99, 9e99)
                         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                        bv.P = 9e999
+                        bv.P = 9e99
                         bv.Parent = Ball
 
                         -- Config da oscilação vertical (mais forte e moderna)
@@ -2598,7 +2589,7 @@ TabPlayers:AddToggle({
                                 local osc = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
 
                                 -- Previsão de movimento
-                                local predictedPos = troot.Position + (troot.Velocity * 0.77)
+                                local predictedPos = troot.Position + (troot.Velocity * 0.30)
 
                                 -- Posição final
                                 local finalPos = predictedPos + Vector3.new(0, baseOffsetY + osc, 0)
