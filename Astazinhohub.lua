@@ -1275,7 +1275,7 @@ local player = Players.LocalPlayer
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
     local oscillationSpeed = 9e99          -- velocidade da subida/descida  
-    local oscillationDistance = 40       -- altura máxima da oscilação  
+    local oscillationDistance = 20       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
