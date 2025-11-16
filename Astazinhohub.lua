@@ -1267,15 +1267,15 @@ local player = Players.LocalPlayer
 
     local bv = Instance.new("BodyVelocity")  
     bv.Name = "FlingPower"  
-    bv.Velocity = Vector3.new(9e9, 9e9, 9e9)  
+    bv.Velocity = Vector3.new(9e999, 9e999, 9e999)  
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)  
-    bv.P = 9e99  
+    bv.P = 9e999  
     bv.Parent = Ball  
 
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
-    local oscillationSpeed = 9e99          -- velocidade da subida/descida  
-    local oscillationDistance = 30       -- altura máxima da oscilação  
+    local oscillationSpeed = 9e999          -- velocidade da subida/descida  
+    local oscillationDistance = 60       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
@@ -2513,58 +2513,99 @@ TabPlayers:AddToggle({
     Default = false,
     Callback = function(state)
         autoFling = state
+
         if autoFling then
             task.spawn(function()
+
+                -- Serviços que a nova versão usa
+                local Players = game:GetService("Players")
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local Workspace = game:GetService("Workspace")
+                local RunService = game:GetService("RunService")
+
+                local player = Players.LocalPlayer  
+
                 while autoFling do
-                    local targetPlayer = Players:FindFirstChild(selectedPlayer) -- já vem do seu hub
+                    local targetPlayer = Players:FindFirstChild(selectedPlayer)
+
                     if targetPlayer and targetPlayer.Character then
+                        
                         local character = player.Character or player.CharacterAdded:Wait()
                         local backpack = player:WaitForChild("Backpack")
                         local ServerBalls = Workspace:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")
 
-                        -- Equipar bola
+                        -- Equipar bola se não tiver
                         if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then
                             ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
                         end
 
                         repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")
+
+                        -- Equipar
                         local ballTool = backpack:FindFirstChild("SoccerBall")
                         if ballTool then
                             ballTool.Parent = character
                         end
 
-                        -- Espera bola no Server
+                        -- Espera bola no Workspace
                         repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
                         local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name)
+
                         Ball.CanCollide = false
                         Ball.Massless = true
                         Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
 
-                        -- BodyVelocity
-                        if Ball:FindFirstChildWhichIsA("BodyVelocity") then
-                            Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
+                        local tchar = targetPlayer.Character
+                        local troot = tchar:FindFirstChild("HumanoidRootPart")
+                        local thum = tchar:FindFirstChild("Humanoid")
+                        if not troot or not thum then 
+                            task.wait(0.3)
+                            continue 
                         end
 
+                        -- Remove BV antigo
+                        local oldBV = Ball:FindFirstChildWhichIsA("BodyVelocity")
+                        if oldBV then oldBV:Destroy() end
+
+                        -- Cria novo BV
                         local bv = Instance.new("BodyVelocity")
                         bv.Name = "FlingPower"
-                        bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
+                        bv.Velocity = Vector3.new(9e999, 9e999, 9e999)
                         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                         bv.P = 9e999
                         bv.Parent = Ball
 
-                        -- Loop colar no alvo
-                        local tchar = targetPlayer.Character
-                        local troot = tchar:FindFirstChild("HumanoidRootPart")
-                        local thum = tchar:FindFirstChild("Humanoid")
-                        if troot and thum then
+                        -- Config da oscilação vertical (mais forte e moderna)
+                        local oscillationTime = 0
+                        local oscillationSpeed = 9e999
+                        local oscillationDistance = 60
+                        local baseOffsetY = 0
+
+                        -- Loop que cola a bola no alvo
+                        task.spawn(function()
                             repeat
-                                local pos = troot.Position + (troot.Velocity / 1.5)
-                                Ball.CFrame = CFrame.new(pos)
+                                oscillationTime += RunService.Heartbeat:Wait()
+
+                                local osc = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
+
+                                -- Previsão de movimento
+                                local predictedPos = troot.Position + (troot.Velocity * 0.77)
+
+                                -- Posição final
+                                local finalPos = predictedPos + Vector3.new(0, baseOffsetY + osc, 0)
+                                Ball.CFrame = CFrame.new(finalPos)
+
+                                -- Rotação invisível
                                 Ball.Orientation += Vector3.new(360, 360, 360)
-                                task.wait(1)
-                            until not autoFling or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
-                        end
+
+                            until not autoFling
+                                or troot.Velocity.Magnitude > 100
+                                or thum.Health <= 0
+                                or not tchar:IsDescendantOf(Workspace)
+                                or targetPlayer.Parent ~= Players
+                        end)
                     end
+
                     task.wait(0.5)
                 end
             end)
