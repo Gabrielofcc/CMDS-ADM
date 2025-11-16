@@ -1275,7 +1275,7 @@ local player = Players.LocalPlayer
     -- Variáveis para movimento vertical (em vez de frente/trás)  
     local oscillationTime = 0  
     local oscillationSpeed = 9e99          -- velocidade da subida/descida  
-    local oscillationDistance = 30       -- altura máxima da oscilação  
+    local oscillationDistance = 40       -- altura máxima da oscilação  
     local baseOffsetY = 0               -- posição base (baixo do pé)  
 
     task.spawn(function()  
@@ -1286,7 +1286,7 @@ local player = Players.LocalPlayer
             local oscillation = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance  
 
             -- PREVISÃO: calcula onde o alvo vai estar (adicionado só isso)  
-            local predictedPos = troot.Position + (troot.Velocity * 0.77)  
+            local predictedPos = troot.Position + (troot.Velocity * 0.75)  
 
             -- posição final fica embaixo do alvo, oscilando pra cima/baixo  
             local basePos = predictedPos + Vector3.new(0, baseOffsetY + oscillation, 0)  
@@ -1300,35 +1300,6 @@ local player = Players.LocalPlayer
     end)  
 end
 
-})
-
-TabPlayers:AddButton({
-    Name = "Shrink Me",
-    Description = "Deixa seu personagem cada vez menor até 50% do tamanho normal",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid", 5)
-
-        if not humanoid then
-            warn("Humanoid não encontrado!")
-            return
-        end
-
-        -- Sequência de tamanhos conforme solicitado
-        local sizes = {1, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50}
-
-        for _, size in ipairs(sizes) do
-            if humanoid and humanoid.Parent and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
-                humanoid:ScaleTo(size)
-                task.wait(0.2) -- meio segundo entre cada redução
-            else
-                break
-            end
-        end
-
-        print("Shrink completo! Tamanho final: 0.50x")
-    end
 })
 
 TabPlayers:AddToggle({
@@ -2513,99 +2484,58 @@ TabPlayers:AddToggle({
     Default = false,
     Callback = function(state)
         autoFling = state
-
         if autoFling then
             task.spawn(function()
-
-                -- Serviços que a nova versão usa
-                local Players = game:GetService("Players")
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local Workspace = game:GetService("Workspace")
-                local RunService = game:GetService("RunService")
-
-                local player = Players.LocalPlayer  
-
                 while autoFling do
-                    local targetPlayer = Players:FindFirstChild(selectedPlayer)
-
+                    local targetPlayer = Players:FindFirstChild(selectedPlayer) -- já vem do seu hub
                     if targetPlayer and targetPlayer.Character then
-                        
                         local character = player.Character or player.CharacterAdded:Wait()
                         local backpack = player:WaitForChild("Backpack")
                         local ServerBalls = Workspace:WaitForChild("WorkspaceCom"):WaitForChild("001_SoccerBalls")
 
-                        -- Equipar bola se não tiver
+                        -- Equipar bola
                         if not backpack:FindFirstChild("SoccerBall") and not character:FindFirstChild("SoccerBall") then
                             ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "SoccerBall")
                         end
 
                         repeat task.wait() until backpack:FindFirstChild("SoccerBall") or character:FindFirstChild("SoccerBall")
-
-                        -- Equipar
                         local ballTool = backpack:FindFirstChild("SoccerBall")
                         if ballTool then
                             ballTool.Parent = character
                         end
 
-                        -- Espera bola no Workspace
+                        -- Espera bola no Server
                         repeat task.wait() until ServerBalls:FindFirstChild("Soccer" .. player.Name)
                         local Ball = ServerBalls:FindFirstChild("Soccer" .. player.Name)
-
                         Ball.CanCollide = false
                         Ball.Massless = true
                         Ball.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0)
 
-                        local tchar = targetPlayer.Character
-                        local troot = tchar:FindFirstChild("HumanoidRootPart")
-                        local thum = tchar:FindFirstChild("Humanoid")
-                        if not troot or not thum then 
-                            task.wait(0.3)
-                            continue 
+                        -- BodyVelocity
+                        if Ball:FindFirstChildWhichIsA("BodyVelocity") then
+                            Ball:FindFirstChildWhichIsA("BodyVelocity"):Destroy()
                         end
 
-                        -- Remove BV antigo
-                        local oldBV = Ball:FindFirstChildWhichIsA("BodyVelocity")
-                        if oldBV then oldBV:Destroy() end
-
-                        -- Cria novo BV
                         local bv = Instance.new("BodyVelocity")
                         bv.Name = "FlingPower"
                         bv.Velocity = Vector3.new(9e9, 9e9, 9e9)
                         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                        bv.P = 9e99
+                        bv.P = 9e999
                         bv.Parent = Ball
 
-                        -- Config da oscilação vertical (mais forte e moderna)
-                        local oscillationTime = 0
-                        local oscillationSpeed = 9e99
-                        local oscillationDistance = 30
-                        local baseOffsetY = 0
-
-                        -- Loop que cola a bola no alvo
-                        task.spawn(function()
+                        -- Loop colar no alvo
+                        local tchar = targetPlayer.Character
+                        local troot = tchar:FindFirstChild("HumanoidRootPart")
+                        local thum = tchar:FindFirstChild("Humanoid")
+                        if troot and thum then
                             repeat
-                                oscillationTime += RunService.Heartbeat:Wait()
-
-                                local osc = math.sin(oscillationTime * oscillationSpeed) * oscillationDistance
-
-                                -- Previsão de movimento
-                                local predictedPos = troot.Position + (troot.Velocity * 0.77)
-
-                                -- Posição final
-                                local finalPos = predictedPos + Vector3.new(0, baseOffsetY + osc, 0)
-                                Ball.CFrame = CFrame.new(finalPos)
-
-                                -- Rotação invisível
+                                local pos = troot.Position + (troot.Velocity / 1.5)
+                                Ball.CFrame = CFrame.new(pos)
                                 Ball.Orientation += Vector3.new(360, 360, 360)
-
-                            until not autoFling
-                                or troot.Velocity.Magnitude > 100
-                                or thum.Health <= 0
-                                or not tchar:IsDescendantOf(Workspace)
-                                or targetPlayer.Parent ~= Players
-                        end)
+                                task.wait(1)
+                            until not autoFling or thum.Health <= 0 or not tchar:IsDescendantOf(Workspace) or targetPlayer.Parent ~= Players
+                        end
                     end
-
                     task.wait(0.5)
                 end
             end)
